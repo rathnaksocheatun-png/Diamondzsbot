@@ -1,0 +1,66 @@
+"""Every main-menu button. This router is included FIRST so that tapping a
+menu button always works, even in the middle of another conversation."""
+from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
+
+from app.config import Settings
+from app.database.db import Database
+from app.handlers import info, shop, wallet
+from app.keyboards.user import language_kb
+from app.texts import menu_labels, t
+
+router = Router(name="menu")
+
+
+@router.message(F.text.in_(menu_labels("buy")))
+async def menu_buy(message: Message, state: FSMContext, db: Database, user: dict):
+    await state.clear()
+    await shop.show_games(message, db, user["language"])
+
+
+@router.message(F.text.in_(menu_labels("orders")))
+async def menu_orders(message: Message, state: FSMContext, db: Database, user: dict):
+    await state.clear()
+    await shop.show_orders(message, db, user)
+
+
+@router.message(F.text.in_(menu_labels("wallet")))
+async def menu_wallet(message: Message, state: FSMContext, user: dict):
+    await state.clear()
+    await wallet.show_wallet(message, user)
+
+
+@router.message(F.text.in_(menu_labels("deposit")))
+async def menu_deposit(message: Message, state: FSMContext, db: Database, user: dict, khpay=None):
+    await wallet.start_deposit(message, state, db, user, auto=khpay is not None)
+
+
+@router.message(F.text.in_(menu_labels("promos")))
+async def menu_promos(message: Message, state: FSMContext, db: Database, user: dict):
+    await state.clear()
+    await info.show_promos(message, db, user["language"])
+
+
+@router.message(F.text.in_(menu_labels("support")))
+async def menu_support(message: Message, state: FSMContext, settings: Settings, user: dict):
+    await state.clear()
+    await info.show_support(message, settings, user["language"])
+
+
+@router.message(F.text.in_(menu_labels("history")))
+async def menu_history(message: Message, state: FSMContext, db: Database, user: dict):
+    await state.clear()
+    await wallet.show_history(message, db, user)
+
+
+@router.message(F.text.in_(menu_labels("howto")))
+async def menu_howto(message: Message, state: FSMContext, user: dict):
+    await state.clear()
+    await info.show_howto(message, user["language"])
+
+
+@router.message(F.text.in_(menu_labels("language")))
+async def menu_language(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer(t("en", "choose_language"), reply_markup=language_kb())
