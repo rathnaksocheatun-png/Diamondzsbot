@@ -20,6 +20,7 @@ from app.services.bay2game import Bay2GameClient, Bay2GameError
 from app.services.fulfilment import watch_stuck_orders
 from app.services.pricing import watch_prices
 from app.services.khpay import KhpayClient, KhpayError
+from app.utils.commands import setup_commands
 from app.utils.custom_emoji import CustomEmojiMiddleware, load_mapping
 from app.services.online_payments import watch_payments
 from app.utils.telegram import notify_admins
@@ -130,6 +131,7 @@ async def main() -> None:
         me = await bot.get_me()
         log.info("Bot started as @%s - press Ctrl+C to stop", me.username)
         await bot.delete_webhook(drop_pending_updates=True)
+        await setup_commands(bot, settings)  # Telegram "Menu" list (customers + admins)
         if khpay is not None:
             await _check_khpay(bot, settings, khpay)
             watcher = asyncio.create_task(watch_payments(bot, db, khpay, settings))
