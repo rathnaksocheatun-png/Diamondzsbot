@@ -9,6 +9,4 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
-# /data must be a persistent volume on the host, otherwise the database is lost on restart.
-VOLUME ["/data"]
 CMD ["python", "main.py"]

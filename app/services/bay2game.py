@@ -72,6 +72,24 @@ class OrderStatus:
     amount_cents: Optional[int]
 
 
+def _ok(data: dict) -> bool:
+    """Bay2Game says SUCCESS; accept any letter case so 'success' works too."""
+    return str(data.get("status") or "").strip().upper() == "SUCCESS"
+
+
+def _why(data: dict, default: str) -> str:
+    """Readable reason for a refused request (never contains the API key)."""
+    msg = str(data.get("message") or data.get("error") or "").strip()
+    status = str(data.get("status") or "").strip()
+    parts = [msg or default, f"HTTP {data.get('_http')}"]
+    if status and status.upper() != "SUCCESS":
+        parts.append(f"status={status[:30]}")
+    keys = ",".join(sorted(k for k in data if k != "_http"))[:80]
+    if not msg:
+        parts.append(f"reply keys: {keys or 'none'}")
+    return " | ".join(parts)
+
+
 class Bay2GameClient:
     def __init__(self, api_key: str, base_url: str = "https://api.bay2game.xyz/api",
                  method: str = "POST", timeout: int = 20):
@@ -122,8 +140,8 @@ class Bay2GameClient:
 
     async def balance_cents(self) -> int:
         data = await self._call("/profile", {})
-        if data.get("status") != "SUCCESS":
-            raise Bay2GameFailed(str(data.get("message") or "profile request failed"))
+        if not _ok(data):
+            raise Bay2GameFailed(_why(data, "profile request failed"))
         cents = usd_to_cents_ceil((data.get("user") or {}).get("balance"))
         if cents is None:
             raise Bay2GameError("profile has no balance")
@@ -131,8 +149,8 @@ class Bay2GameClient:
 
     async def categories(self) -> list:
         data = await self._call("/categories", {})
-        if data.get("status") != "SUCCESS":
-            raise Bay2GameFailed(str(data.get("message") or "categories request failed"))
+        if not _ok(data):
+            raise Bay2GameFailed(_why(data, "categories request failed"))
         return list(data.get("categories") or [])
 
     async def products(self, game_code: str, max_age: float = 60.0) -> list:
@@ -140,8 +158,8 @@ class Bay2GameClient:
         if cached and time.monotonic() - cached[0] < max_age:
             return cached[1]
         data = await self._call("/products", {"game_code": game_code})
-        if data.get("status") != "SUCCESS":
-            raise Bay2GameFailed(str(data.get("message") or "products request failed"))
+        if not _ok(data):
+            raise Bay2GameFailed(_why(data, "products request failed"))
         items = []
         for p in data.get("products") or []:
             cents = usd_to_cents_ceil(p.get("sell_price"))
@@ -185,7 +203,7 @@ class Bay2GameClient:
 
     async def check_order(self, reference: str) -> OrderStatus:
         data = await self._call("/check_order", {"reference": reference})
-        if data.get("status") == "SUCCESS" and isinstance(data.get("order"), dict):
+        if _ok(data) and isinstance(data.get("order"), dict):
             order = data["order"]
             raw = str(order.get("status") or "").lower()
             amount = order.get("amount")
