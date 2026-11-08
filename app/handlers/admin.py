@@ -217,24 +217,32 @@ async def _show_product(target, db: Database, product_id: int) -> None:
         await target.answer(text, reply_markup=markup)
 
 
-@router.callback_query(F.data == "adm:products")
+@router.callback_query(F.data.regexp(r"^adm:products(:\d+)?$"))
 async def cb_products(cb: CallbackQuery, db: Database):
+    parts = _data(cb)
+    page = to_int(parts[2]) or 0 if len(parts) > 2 else 0
     games = await repo.list_games(db)
     await cb.answer()
-    await edit_or_send(cb, "🛍 <b>Products</b>\nChoose a game:", kb.games_admin_kb(games))
+    await edit_or_send(
+        cb, f"🛍 <b>Products</b> — {len(games)} game(s)\nChoose a game (🚫 = hidden from customers):",
+        kb.games_admin_kb(games, page))
 
 
-@router.callback_query(F.data.regexp(r"^adm:pg:[a-z_]+$"))
+@router.callback_query(F.data.regexp(r"^adm:pg:[a-z0-9_]+(:\d+)?$"))
 async def cb_game_products(cb: CallbackQuery, db: Database):
-    code = _data(cb)[2]
+    parts = _data(cb)
+    code = parts[2]
+    page = to_int(parts[3]) or 0 if len(parts) > 3 else 0
     game = await repo.get_game(db, code)
     if game is None:
         await cb.answer("Game not found.", show_alert=True)
         return
     products = await repo.list_products(db, code, only_active=False)
-    text = f"🛍 <b>{esc(game['name'])}</b> — {len(products)} product(s)\n✅ = active, 🚫 = disabled"
+    state = "" if game["is_active"] else "\n🚫 This game is HIDDEN from customers."
+    text = (f"🛍 <b>{esc(game['name'])}</b> — {len(products)} product(s){state}\n"
+            "✅ = active, 🚫 = disabled")
     await cb.answer()
-    await edit_or_send(cb, text, kb.products_admin_kb(products, code))
+    await edit_or_send(cb, text, kb.products_admin_kb(products, game, page))
 
 
 @router.callback_query(F.data.regexp(r"^adm:p:\d+$"))
@@ -319,7 +327,7 @@ async def on_new_name(message: Message, state: FSMContext, db: Database):
     await _show_product(message, db, product_id)
 
 
-@router.callback_query(F.data.regexp(r"^adm:padd:[a-z_]+$"))
+@router.callback_query(F.data.regexp(r"^adm:padd:[a-z0-9_]+$"))
 async def cb_add_start(cb: CallbackQuery, state: FSMContext, db: Database):
     code = _data(cb)[2]
     game = await repo.get_game(db, code)

@@ -2,7 +2,6 @@
 from typing import Optional
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from app.utils.formatting import money
 
@@ -21,14 +20,21 @@ def _btn(text: str, data: str, style: Optional[str] = None) -> InlineKeyboardBut
     return InlineKeyboardButton(text=text, callback_data=data, style=style)
 
 
+button = _btn      # public name for other modules
+
+
 def home_row() -> list:
     return [_btn("🏠 Admin menu", "adm:home")]
+
+
+PAGE_SIZE = 12     # buttons per page in admin lists (Telegram allows 100 per message)
 
 
 def admin_menu_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [_btn("👥 Customers", "adm:cust:0"), _btn("📦 Orders", "adm:orders:pending:0")],
         [_btn("🛍 Products", "adm:products"), _btn("💰 Deposits", "adm:deposits")],
+        [_btn("🔌 Bay2Game (auto games & packages)", "adm:b2g")],
         [_btn("📊 Sales report", "adm:reports"), _btn("🎁 Promotions text", "adm:promo")],
         [_btn("✖️ Close", "adm:close")],
     ])
@@ -81,21 +87,40 @@ def order_detail_kb(order: dict) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def games_admin_kb(games: list) -> InlineKeyboardMarkup:
-    builder = InlineKeyboardBuilder()
-    for g in games:
-        builder.button(text=f"{g['emoji']} {g['name']}", callback_data=f"adm:pg:{g['code']}")
-    builder.adjust(1)
-    builder.row(*home_row())
-    return builder.as_markup()
-
-
-def products_admin_kb(products: list, game_code: str) -> InlineKeyboardMarkup:
+def games_admin_kb(games: list, page: int = 0) -> InlineKeyboardMarkup:
+    """One page of games (PAGE_SIZE). `games` is the full list."""
     rows = []
-    for p in products:
+    for g in games[page * PAGE_SIZE:(page + 1) * PAGE_SIZE]:
+        hidden = "" if g.get("is_active", 1) else "🚫 "
+        rows.append([_btn(f"{hidden}{g['emoji']} {g['name']}", f"adm:pg:{g['code']}",
+                          style="primary")])
+    nav = pagination_row("adm:products", page, (page + 1) * PAGE_SIZE < len(games))
+    if nav:
+        rows.append(nav)
+    rows.append([_btn("🔌 Import from Bay2Game", "adm:b2g")])
+    rows.append(home_row())
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def products_admin_kb(products: list, game: dict, page: int = 0) -> InlineKeyboardMarkup:
+    """One page of a game's packages, plus the game-level buttons."""
+    code = game["code"]
+    rows = []
+    for p in products[page * PAGE_SIZE:(page + 1) * PAGE_SIZE]:
         icon = "✅" if p["is_active"] else "🚫"
         rows.append([_btn(f"{icon} {p['name']} — {money(p['price_cents'])}", f"adm:p:{p['id']}")])
-    rows.append([_btn("➕ Add product", f"adm:padd:{game_code}")])
+    nav = pagination_row(f"adm:pg:{code}", page, (page + 1) * PAGE_SIZE < len(products))
+    if nav:
+        rows.append(nav)
+    rows.append([_btn("➕ Add product", f"adm:padd:{code}")])
+    rows.append([_btn("✏️ Rename game", f"adm:gname:{code}", style="primary"),
+                 _btn("😀 Game emoji", f"adm:gemoji:{code}", style="primary")])
+    rows.append([_btn("💎 Emoji for ALL its packages", f"adm:gpemoji:{code}", style="primary")])
+    shown = game.get("is_active", 1)
+    rows.append([
+        _btn("🙈 Hide game" if shown else "👁 Show game", f"adm:gtoggle:{code}", style="primary"),
+        _btn("🗑 Delete game", f"adm:gdel:{code}", style="danger"),
+    ])
     rows.append([_btn("⬅️ Games", "adm:products")])
     rows.append(home_row())
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -106,8 +131,50 @@ def product_detail_kb(product: dict) -> InlineKeyboardMarkup:
     toggle = "🚫 Disable" if product["is_active"] else "✅ Enable"
     return InlineKeyboardMarkup(inline_keyboard=[
         [_btn("💲 Edit price", f"adm:pprice:{pid}"), _btn("✏️ Edit name", f"adm:pname:{pid}")],
-        [_btn(toggle, f"adm:ptoggle:{pid}")],
+        [_btn("😀 Edit emoji", f"adm:pemoji:{pid}", style="primary"), _btn(toggle, f"adm:ptoggle:{pid}")],
+        [_btn("🗑 Delete", f"adm:pdel:{pid}", style="danger")],
         [_btn("⬅️ Products", f"adm:pg:{product['game_code']}")],
+        home_row(),
+    ])
+
+
+def confirm_delete_kb(yes_data: str, back_data: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [_btn("🗑 Yes, delete", yes_data, style="danger"), _btn("⬅️ No, keep it", back_data,
+                                                              style="primary")],
+    ])
+
+
+def b2g_panel_kb(auto_on: bool, has_removed: bool) -> InlineKeyboardMarkup:
+    rows = [
+        [_btn("📥 Import ALL games & packages", "adm:b2g:import", style="success")],
+        [_btn("🎮 Choose games to import", "adm:b2g:pick:0")],
+        [_btn("💲 Set profit per sale", "adm:b2g:margin"), _btn("🔄 Update prices", "adm:b2g:sync")],
+        [_btn("🤖 Auto-add new: ON ✅ (tap to turn off)" if auto_on
+              else "🤖 Auto-add new: OFF (tap to turn on)", "adm:b2g:auto", style="primary")],
+    ]
+    if has_removed:
+        rows.append([_btn("♻️ Restore deleted items", "adm:b2g:restore", style="primary")])
+    rows.append([_btn("🛍 Manage products (delete / hide)", "adm:products", style="primary")])
+    rows.append(home_row())
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def b2g_pick_kb(entries: list, page: int) -> InlineKeyboardMarkup:
+    """entries: [(label, supplier_game_code)] - one page is shown."""
+    rows = [[_btn(label, f"adm:b2g:one:{code}", style="primary")]
+            for label, code in entries[page * PAGE_SIZE:(page + 1) * PAGE_SIZE]]
+    nav = pagination_row("adm:b2g:pick", page, (page + 1) * PAGE_SIZE < len(entries))
+    if nav:
+        rows.append(nav)
+    rows.append([_btn("⬅️ Bay2Game", "adm:b2g")])
+    rows.append(home_row())
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def b2g_back_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [_btn("🛍 Products", "adm:products", style="primary"), _btn("⬅️ Bay2Game", "adm:b2g")],
         home_row(),
     ])
 

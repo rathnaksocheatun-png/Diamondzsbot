@@ -8,6 +8,7 @@ from aiogram.types import (
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from app.texts import t
+from app.utils import icons
 from app.utils.formatting import money
 
 _MENU_ROWS = [
@@ -46,19 +47,44 @@ def language_kb() -> InlineKeyboardMarkup:
     ]])
 
 
-def games_kb(games: list) -> InlineKeyboardMarkup:
+PAGE_SIZE = 12     # buttons per page (Telegram allows at most 100 per message)
+
+
+def _nav_row(prefix: str, page: int, total: int) -> list:
+    """⬅️ / ➡️ buttons; callback data is  <prefix>:<page>."""
+    row = []
+    if page > 0:
+        row.append(InlineKeyboardButton(text="⬅️", callback_data=f"{prefix}:{page - 1}"))
+    if (page + 1) * PAGE_SIZE < total:
+        row.append(InlineKeyboardButton(text="➡️", callback_data=f"{prefix}:{page + 1}"))
+    return row
+
+
+def games_kb(games: list, page: int = 0) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    for game in games:
-        builder.button(text=f"{game['emoji']} {game['name']}", callback_data=f"game:{game['code']}", style="primary")
+    for game in games[page * PAGE_SIZE:(page + 1) * PAGE_SIZE]:
+        prefix, icon = icons.button_icon(game.get("emoji"), game.get("emoji_id"), "🎮")
+        extra = {"icon_custom_emoji_id": icon} if icon else {}
+        builder.button(text=f"{prefix}{game['name']}", callback_data=f"game:{game['code']}",
+                       style="primary", **extra)
     builder.adjust(1)
+    nav = _nav_row("buy:gp", page, len(games))
+    if nav:
+        builder.row(*nav)
     return builder.as_markup()
 
 
-def products_kb(products: list, lang: str) -> InlineKeyboardMarkup:
+def products_kb(products: list, lang: str, game_code: str = "", page: int = 0) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    for p in products:
-        builder.button(text=f"💎 {p['name']} — {money(p['price_cents'])}", callback_data=f"pkg:{p['id']}", style="success")
+    for p in products[page * PAGE_SIZE:(page + 1) * PAGE_SIZE]:
+        prefix, icon = icons.button_icon(p.get("emoji"), p.get("emoji_id"), "💎")
+        extra = {"icon_custom_emoji_id": icon} if icon else {}
+        builder.button(text=f"{prefix}{p['name']} — {money(p['price_cents'])}",
+                       callback_data=f"pkg:{p['id']}", style="success", **extra)
     builder.adjust(1)
+    nav = _nav_row(f"game:{game_code}", page, len(products)) if game_code else []
+    if nav:
+        builder.row(*nav)
     builder.row(InlineKeyboardButton(text=t(lang, "btn_back"), callback_data="buy:back"))
     return builder.as_markup()
 

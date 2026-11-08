@@ -21,6 +21,9 @@ MAX_CHARS = 3500
 
 HELP = (
     "🔌 <b>Bay2Game (automatic delivery)</b>\n\n"
+    "📥 <b>Automatic games &amp; packages</b>\n"
+    "/b2g_import - pull ALL games and packages from Bay2Game into your shop\n"
+    "(or use Admin → 🔌 Bay2Game). Delete what you do not want in Admin → 🛍 Products.\n\n"
     "/b2g_games - supplier games and their codes\n"
     "/b2g_products &lt;game_code&gt; - supplier packages and their cost\n"
     "/b2g_ours - your packages (with IDs) and what is connected\n"

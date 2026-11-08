@@ -18,3 +18,8 @@ class AdminFlow(StatesGroup):
     edit_price = State()
     edit_name = State()
     promo = State()
+    b2g_margin = State()
+    game_name = State()
+    game_emoji = State()
+    product_emoji = State()
+    game_pkg_emoji = State()

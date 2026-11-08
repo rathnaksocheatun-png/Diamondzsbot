@@ -19,6 +19,7 @@ from app.services import orders as order_service
 from app.services.bay2game import Bay2GameClient
 from app.services.errors import DuplicateOrder, InsufficientBalance, ProductUnavailable
 from app.texts import t
+from app.utils import icons
 from app.utils.formatting import esc, money, short_date
 from app.utils.telegram import edit_or_send, notify_admins
 from app.utils.validators import to_int, valid_player_id, valid_server_id
@@ -28,7 +29,7 @@ _background: set = set()      # keeps running delivery jobs alive until they fin
 
 
 async def show_games(target: Message, db: Database, lang: str) -> None:
-    games = await repo.list_games(db)
+    games = await repo.list_games(db, only_active=True)
     await target.answer(t(lang, "choose_game"), reply_markup=games_kb(games))
 
 
@@ -49,19 +50,25 @@ async def show_orders(target: Message, db: Database, user: dict) -> None:
     await target.answer(lines[0] + "\n\n" + "\n\n".join(lines[2:]))
 
 
-@router.callback_query(F.data == "buy:back")
+@router.callback_query(F.data.regexp(r"^buy:(back|gp:\d+)$"))
 async def on_back_to_games(cb: CallbackQuery, db: Database, user: dict):
+    """The game list: 'buy:back' = first page, 'buy:gp:<n>' = page n."""
     await cb.answer()
-    games = await repo.list_games(db)
-    await edit_or_send(cb, t(user["language"], "choose_game"), games_kb(games))
+    parts = (cb.data or "").split(":")
+    page = to_int(parts[2]) or 0 if len(parts) > 2 else 0
+    games = await repo.list_games(db, only_active=True)
+    await edit_or_send(cb, t(user["language"], "choose_game"), games_kb(games, page))
 
 
 @router.callback_query(F.data.startswith("game:"))
 async def on_game(cb: CallbackQuery, db: Database, user: dict):
+    """'game:<code>' = first page of packages, 'game:<code>:<n>' = page n."""
     lang = user["language"]
-    code = (cb.data or "").split(":", 1)[1]
+    parts = (cb.data or "").split(":")
+    code = parts[1] if len(parts) > 1 else ""
+    page = to_int(parts[2]) or 0 if len(parts) > 2 else 0
     game = await repo.get_game(db, code)
-    if game is None:
+    if game is None or not game["is_active"]:
         await cb.answer(t(lang, "product_unavailable"), show_alert=True)
         return
     await cb.answer()
@@ -71,8 +78,9 @@ async def on_game(cb: CallbackQuery, db: Database, user: dict):
         return
     await edit_or_send(
         cb,
-        t(lang, "choose_package", game=f"{game['emoji']} <b>{esc(game['name'])}</b>"),
-        products_kb(products, lang),
+        t(lang, "choose_package", game=f"{icons.html_icon(game['emoji'], game.get('emoji_id'))} "
+          f"<b>{esc(game['name'])}</b>"),
+        products_kb(products, lang, code, page),
     )
 
 
@@ -81,7 +89,7 @@ async def on_package(cb: CallbackQuery, state: FSMContext, db: Database, user: d
     lang = user["language"]
     product_id = to_int((cb.data or "").split(":", 1)[1])
     product = await repo.get_product(db, product_id) if product_id else None
-    if product is None or not product["is_active"]:
+    if product is None or not product["is_active"] or not product["game_active"]:
         await cb.answer(t(lang, "product_unavailable"), show_alert=True)
         return
     await state.clear()

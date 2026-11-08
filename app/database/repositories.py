@@ -60,8 +60,11 @@ async def list_users(db: Database, limit: int, offset: int) -> list:
 # ----------------------------------------------------------------- games
 
 
-async def list_games(db: Database) -> list:
-    return await db.fetchall("SELECT * FROM games ORDER BY sort_order, name")
+async def list_games(db: Database, only_active: bool = False) -> list:
+    sql = "SELECT * FROM games"
+    if only_active:
+        sql += " WHERE is_active = 1"
+    return await db.fetchall(sql + " ORDER BY sort_order, name")
 
 
 async def get_game(db: Database, code: str) -> Optional[dict]:
@@ -81,7 +84,7 @@ async def list_products(db: Database, game_code: str, only_active: bool) -> list
 
 async def get_product(db: Database, product_id: int) -> Optional[dict]:
     return await db.fetchone(
-        "SELECT p.*, g.name AS game_name, g.needs_server_id "
+        "SELECT p.*, g.name AS game_name, g.needs_server_id, g.is_active AS game_active "
         "FROM products p JOIN games g ON g.code = p.game_code WHERE p.id = ?",
         (product_id,),
     )
@@ -106,6 +109,32 @@ async def update_product_price(db: Database, product_id: int, price_cents: int) 
     return await db.execute(
         "UPDATE products SET price_cents = ? WHERE id = ?", (price_cents, product_id)
     ) == 1
+
+
+async def update_game_name(db: Database, code: str, name: str) -> bool:
+    return await db.execute("UPDATE games SET name = ? WHERE code = ?", (name, code)) == 1
+
+
+async def update_game_emoji(db: Database, code: str, emoji: str, emoji_id: Optional[str]) -> bool:
+    return await db.execute(
+        "UPDATE games SET emoji = ?, emoji_id = ? WHERE code = ?", (emoji, emoji_id, code)) == 1
+
+
+async def update_product_emoji(
+    db: Database, product_id: int, emoji: Optional[str], emoji_id: Optional[str]
+) -> bool:
+    return await db.execute(
+        "UPDATE products SET emoji = ?, emoji_id = ? WHERE id = ?",
+        (emoji, emoji_id, product_id)) == 1
+
+
+async def update_game_products_emoji(
+    db: Database, code: str, emoji: Optional[str], emoji_id: Optional[str]
+) -> int:
+    """Give every package of a game the same icon. Returns how many were changed."""
+    return await db.execute(
+        "UPDATE products SET emoji = ?, emoji_id = ? WHERE game_code = ?",
+        (emoji, emoji_id, code))
 
 
 async def update_product_name(db: Database, product_id: int, name: str) -> bool:

@@ -101,3 +101,12 @@ B) A cloud service you can control from the iPhone browser (for example
     app/keyboards/          buttons (customer + admin)
     app/handlers/           what happens on each tap/message
     app/utils/              validation, formatting, filters, helpers
+
+## Automatic games & packages (Bay2Game)
+
+Admin -> 🔌 Bay2Game: set your profit, then "Import ALL" (or pick games). Selling price =
+Bay2Game cost + profit, kept in sync. New games/packages are added every 6 hours while
+"Auto-add" is ON. Delete or hide anything in Admin -> 🛍 Products; deleted items are
+remembered and never re-imported (use "Restore deleted items" to undo). Items that already
+have orders are hidden instead of erased so order history stays intact.
+Code: `app/services/catalog.py`, `app/handlers/catalog.py`.

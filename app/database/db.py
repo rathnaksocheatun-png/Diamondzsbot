@@ -90,6 +90,15 @@ CREATE TABLE IF NOT EXISTS settings (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+-- Things the admin deleted. The automatic import never brings them back.
+-- supplier_code = '' means "the whole supplier game".
+CREATE TABLE IF NOT EXISTS supplier_removed (
+    supplier_game TEXT NOT NULL,
+    supplier_code TEXT NOT NULL DEFAULT '',
+    removed_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (supplier_game, supplier_code)
+);
 """
 
 GAMES = [
@@ -152,6 +161,16 @@ class Database:
             ("supplier_code", "TEXT"),
             ("margin_cents", "INTEGER"),   # NULL = use the default margin
         ))
+        # Games pulled from Bay2Game automatically; a game can be hidden from customers.
+        await self._add_columns("games", (
+            ("supplier_game", "TEXT"),   # NULL = a game you created yourself
+            ("is_active", "INTEGER NOT NULL DEFAULT 1"),
+            ("emoji_id", "TEXT"),        # Telegram Premium (animated) emoji, optional
+        ))
+        await self._add_columns("products", (
+            ("emoji", "TEXT"),           # NULL = the default 💎
+            ("emoji_id", "TEXT"),        # Telegram Premium (animated) emoji, optional
+        ))
         await self._add_columns("orders", (
             ("auto_state", "TEXT"),      # NULL | submitting | done | review
             ("supplier_ref", "TEXT"),
@@ -169,16 +188,20 @@ class Database:
             self._conn = None
 
     async def _seed(self) -> None:
-        """Insert the 4 games and sample Free Fire packages (first run only)."""
+        """Insert the 4 games and sample Free Fire packages (first run only).
+
+        Only on the first run: if an admin deletes one of these games, it must not
+        come back the next time the bot restarts.
+        """
         async with self.transaction() as conn:
-            for game in GAMES:
-                await conn.execute(
-                    "INSERT OR IGNORE INTO games "
-                    "(code, name, emoji, needs_server_id, sort_order) VALUES (?,?,?,?,?)",
-                    game,
-                )
             cur = await conn.execute("SELECT 1 FROM settings WHERE key = 'seeded_v1'")
             if await cur.fetchone() is None:
+                for game in GAMES:
+                    await conn.execute(
+                        "INSERT OR IGNORE INTO games "
+                        "(code, name, emoji, needs_server_id, sort_order) VALUES (?,?,?,?,?)",
+                        game,
+                    )
                 for order, (name, price) in enumerate(FREE_FIRE_PACKAGES, start=1):
                     await conn.execute(
                         "INSERT INTO products (game_code, name, price_cents, sort_order) "

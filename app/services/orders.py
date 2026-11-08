@@ -27,7 +27,7 @@ async def create_order(
             cur = await conn.execute(
                 "SELECT p.*, g.needs_server_id FROM products p "
                 "JOIN games g ON g.code = p.game_code "
-                "WHERE p.id = ? AND p.is_active = 1",
+                "WHERE p.id = ? AND p.is_active = 1 AND g.is_active = 1",
                 (product_id,),
             )
             product = await cur.fetchone()

@@ -15,8 +15,10 @@ from aiogram.types import ErrorEvent
 from app.config import ConfigError, load_settings
 from app.database.db import Database
 from app.handlers import admin, fallback, menu, shop, start, wallet
+from app.handlers import appearance, catalog as catalog_handlers
 from app.handlers import supplier
 from app.services.bay2game import Bay2GameClient, Bay2GameError
+from app.services.catalog import watch_catalog
 from app.services.fulfilment import watch_stuck_orders
 from app.services.pricing import watch_prices
 from app.services.khpay import KhpayClient, KhpayError
@@ -119,6 +121,8 @@ async def main() -> None:
     dp.include_router(menu.router)      # all main-menu buttons
     dp.include_router(admin.router)     # admin only
     dp.include_router(supplier.router)  # admin only: Bay2Game commands
+    dp.include_router(catalog_handlers.router)  # admin only: import games/packages, delete
+    dp.include_router(appearance.router)  # admin only: rename games, emoji
     dp.include_router(wallet.router)    # deposit flow
     dp.include_router(shop.router)      # ordering flow
     dp.include_router(fallback.router)  # anything else (must be last)
@@ -126,6 +130,7 @@ async def main() -> None:
     watcher = None
     sweeper = None
     pricer = None
+    importer = None
     try:
         me = await bot.get_me()
         log.info("Bot started as @%s - press Ctrl+C to stop", me.username)
@@ -141,6 +146,7 @@ async def main() -> None:
             await _check_bay2game(bot, settings, b2g)
             sweeper = asyncio.create_task(watch_stuck_orders(bot, db, b2g, settings))
             pricer = asyncio.create_task(watch_prices(bot, db, b2g, settings))
+            importer = asyncio.create_task(watch_catalog(bot, db, b2g, settings))
             log.info("Automatic delivery (Bay2Game) is ON")
         else:
             log.info("Automatic delivery is OFF - admins deliver orders by hand")
@@ -149,7 +155,7 @@ async def main() -> None:
         print("\n❌ Telegram rejected your BOT_TOKEN. Check the token in your .env file.\n")
         sys.exit(1)
     finally:
-        for task in (watcher, sweeper, pricer):
+        for task in (watcher, sweeper, pricer, importer):
             if task is not None:
                 task.cancel()
         await db.close()

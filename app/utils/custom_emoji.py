@@ -23,6 +23,8 @@ from typing import Optional
 from aiogram.client.session.middlewares.base import BaseRequestMiddleware
 from aiogram.exceptions import TelegramBadRequest
 
+from app.utils import icons
+
 log = logging.getLogger(__name__)
 
 _VS16 = "️"
@@ -115,6 +117,26 @@ def apply_to_markup(markup, mapping: dict):
     return markup.model_copy(update={"inline_keyboard": new_rows})
 
 
+def strip_icons(markup):
+    """Turn every premium button icon back into a plain emoji in the text."""
+    rows = getattr(markup, "inline_keyboard", None)
+    if not rows:
+        return markup
+    new_rows = []
+    for row in rows:
+        new_row = []
+        for button in row:
+            icon = getattr(button, "icon_custom_emoji_id", None)
+            if icon:
+                new_row.append(button.model_copy(update={
+                    "icon_custom_emoji_id": None,
+                    "text": f"{icons.fallback_for(icon)} {button.text}"}))
+            else:
+                new_row.append(button)
+        new_rows.append(new_row)
+    return markup.model_copy(update={"inline_keyboard": new_rows})
+
+
 class CustomEmojiMiddleware(BaseRequestMiddleware):
     """Applies the emoji upgrade to every outgoing request, with a safe fallback."""
 
@@ -142,5 +164,5 @@ class CustomEmojiMiddleware(BaseRequestMiddleware):
                 raise
             log.warning("Telegram refused premium emoji (%s) - re-sending with plain emoji", exc)
             for field, value in original.items():
-                setattr(method, field, value)
+                setattr(method, field, strip_icons(value) if field == "reply_markup" else value)
             return await make_request(bot, method)
