@@ -72,6 +72,11 @@ class OrderStatus:
     amount_cents: Optional[int]
 
 
+def _ok(data: dict) -> bool:
+    """Bay2Game says SUCCESS; accept any letter case so 'success' works too."""
+    return str(data.get("status") or "").strip().upper() == "SUCCESS"
+
+
 def _why(data: dict, default: str) -> str:
     """Readable reason for a refused request (never contains the API key)."""
     msg = str(data.get("message") or data.get("error") or "").strip()
@@ -135,7 +140,7 @@ class Bay2GameClient:
 
     async def balance_cents(self) -> int:
         data = await self._call("/profile", {})
-        if data.get("status") != "SUCCESS":
+        if not _ok(data):
             raise Bay2GameFailed(_why(data, "profile request failed"))
         cents = usd_to_cents_ceil((data.get("user") or {}).get("balance"))
         if cents is None:
@@ -144,7 +149,7 @@ class Bay2GameClient:
 
     async def categories(self) -> list:
         data = await self._call("/categories", {})
-        if data.get("status") != "SUCCESS":
+        if not _ok(data):
             raise Bay2GameFailed(_why(data, "categories request failed"))
         return list(data.get("categories") or [])
 
@@ -153,7 +158,7 @@ class Bay2GameClient:
         if cached and time.monotonic() - cached[0] < max_age:
             return cached[1]
         data = await self._call("/products", {"game_code": game_code})
-        if data.get("status") != "SUCCESS":
+        if not _ok(data):
             raise Bay2GameFailed(_why(data, "products request failed"))
         items = []
         for p in data.get("products") or []:
@@ -198,7 +203,7 @@ class Bay2GameClient:
 
     async def check_order(self, reference: str) -> OrderStatus:
         data = await self._call("/check_order", {"reference": reference})
-        if data.get("status") == "SUCCESS" and isinstance(data.get("order"), dict):
+        if _ok(data) and isinstance(data.get("order"), dict):
             order = data["order"]
             raw = str(order.get("status") or "").lower()
             amount = order.get("amount")
