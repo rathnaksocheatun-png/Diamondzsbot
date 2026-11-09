@@ -17,6 +17,7 @@ from app.database.db import Database
 from app.handlers import admin, fallback, menu, shop, start, wallet
 from app.handlers import appearance, catalog as catalog_handlers
 from app.handlers import supplier
+from app.handlers import admin_emoji
 from app.services.bay2game import Bay2GameClient, Bay2GameError
 from app.services.catalog import watch_catalog
 from app.services.fulfilment import watch_stuck_orders
@@ -90,11 +91,14 @@ async def main() -> None:
     )
     dp = Dispatcher(storage=MemoryStorage())
 
-    # Premium (animated) emoji from custom_emoji.json - does nothing when the file is empty.
-    emoji_map = load_mapping(os.getenv("CUSTOM_EMOJI_FILE", str(Path(__file__).parent / "custom_emoji.json")))
-    if emoji_map:
-        bot.session.middleware(CustomEmojiMiddleware(emoji_map))
-        log.info("Premium emoji ON for %d emoji", len(emoji_map))
+    # Premium (animated) emoji from custom_emoji.json. The middleware is ALWAYS installed
+    # (even when the file is empty) so an admin can add emoji later with /emoji, live.
+    emoji_file = os.getenv("CUSTOM_EMOJI_FILE", str(Path(__file__).parent / "custom_emoji.json"))
+    emoji_map = load_mapping(emoji_file)
+    admin_emoji.EMOJI_FILE = emoji_file
+    bot.session.middleware(CustomEmojiMiddleware(emoji_map))
+    dp["emoji_mapping"] = emoji_map     # same dict: /emoji edits it, the middleware reads it
+    log.info("Premium emoji: %d emoji set (admins can change them with /emoji)", len(emoji_map))
 
     # Objects that handlers can receive just by naming them as parameters.
     dp["db"] = db
@@ -124,6 +128,7 @@ async def main() -> None:
     dp.include_router(supplier.router)  # admin only: Bay2Game commands
     dp.include_router(catalog_handlers.router)  # admin only: import games/packages, delete
     dp.include_router(appearance.router)  # admin only: rename games, emoji
+    dp.include_router(admin_emoji.router)  # admin only: /emoji premium emoji editor
     dp.include_router(wallet.router)    # deposit flow
     dp.include_router(shop.router)      # ordering flow
     dp.include_router(fallback.router)  # anything else (must be last)
