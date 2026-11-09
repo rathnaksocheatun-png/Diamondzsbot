@@ -2,8 +2,8 @@
 
 Money-safety rules built into this file:
   * One order is sent to the supplier AT MOST ONCE: it is "claimed" with an atomic
-    database update first, and the supplier reference (DZS-<order id>) is unique,
-    so even a repeated request cannot buy twice.
+    database update first, and the supplier reference (DZS<order id, 6 digits>) is
+    unique, so even a repeated request cannot buy twice.
   * We never buy at a loss: if the supplier price is higher than our selling price
     the order is NOT sent; an admin is asked to decide.
   * A clear refusal from the supplier (e.g. invalid Player ID) refunds the customer's
@@ -53,7 +53,12 @@ class Outcome:
 
 
 def reference_for(prefix: str, order_id: int) -> str:
-    return f"{prefix}-{order_id}"
+    """Bay2Game wants 6-64 characters, letters and/or numbers only (no '-' or '_').
+
+    Order 4 with prefix 'DZS' -> 'DZS000004'.
+    """
+    clean = "".join(ch for ch in str(prefix) if ch.isalnum()) or "DZS"
+    return f"{clean}{order_id:06d}"
 
 
 # ----------------------------------------------------------------- state helpers
