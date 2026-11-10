@@ -21,7 +21,7 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
-from aiogram.utils.text_decorations import html_decoration
+from aiogram.utils.text_decorations import HtmlDecoration
 
 from app import texts as texts_module
 from app.database import repositories as repo
@@ -31,6 +31,17 @@ from app.utils import icons
 from app.utils.emoji_store import EmojiStore
 from app.utils.filters import IsAdmin
 from app.utils.formatting import esc
+
+class _RawHtml(HtmlDecoration):
+    """Turns Telegram formatting (bold, premium emoji...) into HTML but leaves the plain
+    text exactly as typed. Without this, <b> tags typed by hand next to a premium emoji
+    would be 'escaped' and customers would see the tags as letters."""
+
+    def quote(self, value: str) -> str:
+        return value
+
+
+raw_html = _RawHtml()
 
 router = Router(name="live_edit")
 router.message.filter(IsAdmin())
@@ -172,7 +183,7 @@ def parse_settext(message: Message) -> Optional[tuple]:
 
     entities = [e.model_copy(update={"offset": e.offset - cut})
                 for e in (message.entities or []) if keep(e)]
-    value = html_decoration.unparse(body, entities) if entities else body
+    value = raw_html.unparse(body, entities) if entities else body
     return head.group(1), head.group(2), value.strip()
 
 
