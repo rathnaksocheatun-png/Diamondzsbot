@@ -254,3 +254,51 @@ async def get_pending_deposit(db: Database, user_id: int) -> Optional[dict]:
         "SELECT * FROM deposit_requests WHERE user_id = ? AND status = 'pending'",
         (user_id,),
     )
+
+
+# ------------------------------------------------- premium emoji (admin-edited)
+
+
+async def list_custom_emojis(db: Database) -> list:
+    return await db.fetchall("SELECT emoji, emoji_id FROM custom_emojis ORDER BY rowid")
+
+
+async def set_custom_emoji(db: Database, emoji: str, emoji_id: str) -> None:
+    await db.execute(
+        "INSERT INTO custom_emojis (emoji, emoji_id) VALUES (?, ?) "
+        "ON CONFLICT(emoji) DO UPDATE SET emoji_id = excluded.emoji_id, "
+        "updated_at = datetime('now')",
+        (emoji, emoji_id),
+    )
+
+
+async def delete_custom_emoji(db: Database, emoji: str) -> bool:
+    return await db.execute("DELETE FROM custom_emojis WHERE emoji = ?", (emoji,)) >= 1
+
+
+async def clear_custom_emojis(db: Database) -> int:
+    return await db.execute("DELETE FROM custom_emojis")
+
+
+# ------------------------------------------------- message texts (admin-edited)
+
+
+async def list_custom_texts(db: Database) -> list:
+    return await db.fetchall("SELECT lang, key, value FROM custom_texts")
+
+
+async def set_custom_text(db: Database, lang: str, key: str, value: str) -> None:
+    await db.execute(
+        "INSERT INTO custom_texts (lang, key, value) VALUES (?, ?, ?) "
+        "ON CONFLICT(lang, key) DO UPDATE SET value = excluded.value, "
+        "updated_at = datetime('now')",
+        (lang, key, value),
+    )
+
+
+async def delete_custom_text(db: Database, key: str, lang: Optional[str] = None) -> int:
+    """Remove the edit (back to the original text). lang=None -> both languages."""
+    if lang:
+        return await db.execute(
+            "DELETE FROM custom_texts WHERE key = ? AND lang = ?", (key, lang))
+    return await db.execute("DELETE FROM custom_texts WHERE key = ?", (key,))

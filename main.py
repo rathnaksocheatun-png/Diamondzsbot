@@ -17,7 +17,7 @@ from app.database.db import Database
 from app.handlers import admin, fallback, menu, shop, start, wallet
 from app.handlers import appearance, catalog as catalog_handlers
 from app.handlers import supplier
-from app.handlers import admin_emoji
+from app.handlers import live_edit
 from app.services.bay2game import Bay2GameClient, Bay2GameError
 from app.services.catalog import watch_catalog
 from app.services.fulfilment import watch_stuck_orders
@@ -25,6 +25,7 @@ from app.services.pricing import watch_prices
 from app.services.khpay import KhpayClient, KhpayError
 from app.utils.commands import setup_commands
 from app.utils.custom_emoji import CustomEmojiMiddleware, load_mapping
+from app.utils.emoji_store import EmojiStore, LiveEmojiMiddleware
 from app.services.online_payments import watch_payments
 from app.utils.telegram import notify_admins
 from app.utils.middleware import UserMiddleware
@@ -91,17 +92,23 @@ async def main() -> None:
     )
     dp = Dispatcher(storage=MemoryStorage())
 
-    # Premium (animated) emoji from custom_emoji.json. The middleware is ALWAYS installed
-    # (even when the file is empty) so an admin can add emoji later with /emoji, live.
-    emoji_file = os.getenv("CUSTOM_EMOJI_FILE", str(Path(__file__).parent / "custom_emoji.json"))
-    emoji_map = load_mapping(emoji_file)
-    admin_emoji.EMOJI_FILE = emoji_file
-    bot.session.middleware(CustomEmojiMiddleware(emoji_map))
-    dp["emoji_mapping"] = emoji_map     # same dict: /emoji edits it, the middleware reads it
-    log.info("Premium emoji: %d emoji set (admins can change them with /emoji)", len(emoji_map))
+    # Premium (animated) emoji from custom_emoji.json - does nothing when the file is empty.
+    emoji_map = load_mapping(os.getenv("CUSTOM_EMOJI_FILE", str(Path(__file__).parent / "custom_emoji.json")))
+    if emoji_map:
+        bot.session.middleware(CustomEmojiMiddleware(emoji_map))
+        log.info("Premium emoji ON for %d emoji", len(emoji_map))
+
+    # Premium emoji + message texts that admins edit from inside the bot (/emoji, /settext).
+    # Saved in the database, applied live - no restart needed. Works next to the file above.
+    emoji_store = EmojiStore()
+    await emoji_store.load(db)
+    bot.session.middleware(LiveEmojiMiddleware(emoji_store))
+    n_texts = await live_edit.load_text_overrides(db)
+    log.info("Admin-edited: %d premium emoji, %d message text(s)", len(emoji_store), n_texts)
 
     # Objects that handlers can receive just by naming them as parameters.
     dp["db"] = db
+    dp["emoji_store"] = emoji_store
     dp["settings"] = settings
     # Automatic payments are ON only when KHPAY_API_KEY is set.
     khpay = (
@@ -123,12 +130,12 @@ async def main() -> None:
 
     # ORDER MATTERS: earlier routers get the first chance to handle a message.
     dp.include_router(start.router)     # /start, /menu, /cancel, language
+    dp.include_router(live_edit.router)  # admin only: /emoji, /texts, /settext (works in any state)
     dp.include_router(menu.router)      # all main-menu buttons
     dp.include_router(admin.router)     # admin only
     dp.include_router(supplier.router)  # admin only: Bay2Game commands
     dp.include_router(catalog_handlers.router)  # admin only: import games/packages, delete
     dp.include_router(appearance.router)  # admin only: rename games, emoji
-    dp.include_router(admin_emoji.router)  # admin only: /emoji premium emoji editor
     dp.include_router(wallet.router)    # deposit flow
     dp.include_router(shop.router)      # ordering flow
     dp.include_router(fallback.router)  # anything else (must be last)

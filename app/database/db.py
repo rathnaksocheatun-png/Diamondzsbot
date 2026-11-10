@@ -99,6 +99,23 @@ CREATE TABLE IF NOT EXISTS supplier_removed (
     removed_at    TEXT NOT NULL DEFAULT (datetime('now')),
     PRIMARY KEY (supplier_game, supplier_code)
 );
+
+-- Premium (animated) emoji the admin set from inside the bot (/emoji).
+CREATE TABLE IF NOT EXISTS custom_emojis (
+    emoji      TEXT PRIMARY KEY,
+    emoji_id   TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Message texts the admin edited from inside the bot (/settext).
+-- No row = the bot uses the original text written in texts.py.
+CREATE TABLE IF NOT EXISTS custom_texts (
+    lang       TEXT NOT NULL CHECK (lang IN ('en', 'km')),
+    key        TEXT NOT NULL,
+    value      TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (lang, key)
+);
 """
 
 GAMES = [

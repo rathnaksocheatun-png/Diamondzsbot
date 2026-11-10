@@ -278,9 +278,25 @@ TEXTS = {
 MENU_KEYS = ["buy", "orders", "wallet", "deposit", "promos", "support", "history", "howto", "language"]
 
 
+# Texts edited by an admin from inside the bot (/settext). Filled from the database
+# at start-up and updated live, so no restart is needed.  {(lang, key): text}
+OVERRIDES: dict = {}
+
+
 def t(lang: str, key: str, **kwargs) -> str:
-    """Look up a text in the user's language (falls back to English)."""
+    """Look up a text in the user's language (falls back to English).
+
+    An admin-edited text (see /settext) wins over the original one. If an edited
+    text is somehow broken, the original text is used instead - so the bot never
+    fails to answer a customer.
+    """
     table = TEXTS.get(lang) or TEXTS["en"]
+    custom = OVERRIDES.get((lang if lang in TEXTS else "en", key))
+    if custom is not None:
+        try:
+            return custom.format(**kwargs) if kwargs else custom
+        except (KeyError, IndexError, ValueError):
+            pass
     template = table.get(key) or TEXTS["en"][key]
     return template.format(**kwargs) if kwargs else template
 
