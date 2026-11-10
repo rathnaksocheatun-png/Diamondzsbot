@@ -21,6 +21,7 @@ from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
+from aiogram.utils.text_decorations import html_decoration
 
 from app import texts as texts_module
 from app.database import repositories as repo
@@ -49,8 +50,8 @@ ALLOWED_TAGS = {
 }
 _TAG_RE = re.compile(r"<(/?)([A-Za-z][A-Za-z0-9-]*)((?:\s[^<>]*)?)>")
 _BAD_AMP_RE = re.compile(r"&(?!(?:amp|lt|gt|quot|#\d+|#x[0-9a-fA-F]+);)")
-_SET_RE = re.compile(
-    r"^/settext(?:@\w+)?\s+(\S+)(?:[ \t]+(en|km)(?=\s))?\s+(.+)$", re.S | re.I)
+_HEAD_RE = re.compile(
+    r"^\s*/settext(?:@\w+)?\s+(\S+)(?:[ \t]+(en|km)(?=\s))?\s+", re.I)
 _KHMER_RE = re.compile("[\u1780-\u17ff]")
 
 
@@ -142,11 +143,28 @@ def detect_lang(text: str) -> str:
     return "km" if _KHMER_RE.search(text) else "en"
 
 
-def body_for_saving(message: Message) -> str:
-    """The text exactly as typed. If the admin used Telegram's own formatting (bold,
-    italic, premium emoji...) it is converted to HTML; otherwise typed <b>tags</b> stay."""
-    others = [e for e in (message.entities or []) if e.type != "bot_command"]
-    return (message.html_text if others else message.text) or ""
+def parse_settext(message: Message) -> Optional[tuple]:
+    """-> (key, lang or None, text as HTML) or None when the command is incomplete.
+
+    The command, name and language are read from the PLAIN text, so it does not matter
+    if Telegram put some formatting (e.g. monospace from a paste) on them. Only the
+    formatting of the new text itself (bold, italic, premium emoji...) is kept, as HTML.
+    If the admin used no formatting, typed <b>tags</b> are kept as they are."""
+    raw = message.text or ""
+    head = _HEAD_RE.match(raw)
+    if not head:
+        return None
+    body = raw[head.end():]
+    if not body.strip():
+        return None
+    cut = len(raw[:head.end()].encode("utf-16-le")) // 2   # Telegram counts UTF-16 units
+    entities = [
+        e.model_copy(update={"offset": e.offset - cut})
+        for e in (message.entities or [])
+        if e.type != "bot_command" and e.offset >= cut
+    ]
+    value = html_decoration.unparse(body, entities) if entities else body
+    return head.group(1), head.group(2), value.strip()
 
 
 async def reply_chunks(message: Message, lines: list, header: str = "") -> None:
@@ -291,8 +309,8 @@ async def cmd_texts(message: Message, command: CommandObject):
 @router.message(Command("settext"))
 async def cmd_settext(message: Message, db: Database):
     keys = set(editable_keys())
-    match = _SET_RE.match(body_for_saving(message).strip())
-    if not match:
+    parsed = parse_settext(message)
+    if parsed is None:
         await message.answer(
             "✏️ <b>Edit a message</b>\n\n"
             "<code>/settext welcome Your new text...</code>\n"
@@ -302,7 +320,7 @@ async def cmd_settext(message: Message, db: Database):
             "Keep placeholders like <code>{name}</code> exactly as they are.\n\n"
             "/texts shows the names.")
         return
-    key, lang_arg, value = match.group(1), match.group(2), match.group(3).strip()
+    key, lang_arg, value = parsed
     if key not in keys:
         await message.answer(f"⚠️ No editable message called <code>{esc(key)}</code>. "
                              "Send /texts to see the list.")
