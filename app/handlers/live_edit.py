@@ -158,11 +158,20 @@ def parse_settext(message: Message) -> Optional[tuple]:
     if not body.strip():
         return None
     cut = len(raw[:head.end()].encode("utf-16-le")) // 2   # Telegram counts UTF-16 units
-    entities = [
-        e.model_copy(update={"offset": e.offset - cut})
-        for e in (message.entities or [])
-        if e.type != "bot_command" and e.offset >= cut
-    ]
+    total = len(body.encode("utf-16-le")) // 2
+
+    def keep(e) -> bool:
+        if e.type == "bot_command" or e.offset < cut:
+            return False
+        # Text copied from the /texts view arrives wrapped in a monospace block. That is
+        # not formatting the admin wants, and it would turn typed <b> tags into plain
+        # letters - so a monospace block covering the whole new text is ignored.
+        if e.type in ("pre", "code") and e.length >= total - 2:
+            return False
+        return True
+
+    entities = [e.model_copy(update={"offset": e.offset - cut})
+                for e in (message.entities or []) if keep(e)]
     value = html_decoration.unparse(body, entities) if entities else body
     return head.group(1), head.group(2), value.strip()
 
