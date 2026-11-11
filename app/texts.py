@@ -80,6 +80,8 @@ TEXTS = {
         ),
         "deposit_approved_user": "✅ Your deposit #{id} of {amount} was approved. New balance: {balance}",
         "deposit_rejected_user": "❌ Your deposit request #{id} ({amount}) was rejected. Please contact support.",
+        "balance_added_user": "💰 {amount} was added to your wallet. New balance: {balance}",
+        "balance_deducted_user": "💳 {amount} was deducted from your wallet. New balance: {balance}",
         "deposit_intro_auto": (
             "➕ <b>Deposit Money</b>\n\n"
             "Send the amount you want to deposit in USD "
@@ -216,6 +218,8 @@ TEXTS = {
         ),
         "deposit_approved_user": "✅ ការដាក់ប្រាក់ #{id} ចំនួន {amount} ត្រូវបានអនុម័ត។ សមតុល្យថ្មី៖ {balance}",
         "deposit_rejected_user": "❌ សំណើដាក់ប្រាក់ #{id} ({amount}) ត្រូវបានបដិសេធ។ សូមទាក់ទងជំនួយ។",
+        "balance_added_user": "💰 {amount} ត្រូវបានបន្ថែមចូលកាបូបរបស់អ្នក។ សមតុល្យថ្មី៖ {balance}",
+        "balance_deducted_user": "💳 {amount} ត្រូវបានកាត់ចេញពីកាបូបរបស់អ្នក។ សមតុល្យថ្មី៖ {balance}",
         "deposit_intro_auto": (
             "➕ <b>ដាក់ប្រាក់</b>\n\n"
             "សូមផ្ញើចំនួនទឹកប្រាក់ជាដុល្លារដែលអ្នកចង់ដាក់ "

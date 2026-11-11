@@ -49,6 +49,12 @@ ADMIN_COMMANDS = [
     BotCommand(command="b2g_ours", description="📋 Our packages"),
     BotCommand(command="b2g_margin", description="💲 Profit margins"),
     BotCommand(command="b2g_sync", description="🔄 Sync prices now"),
+    BotCommand(command="emoji", description="😀 Set premium emoji"),
+    BotCommand(command="emoji_list", description="📃 Premium emoji list"),
+    BotCommand(command="texts", description="📝 Editable messages"),
+    BotCommand(command="settext", description="✏️ Edit a message"),
+    BotCommand(command="addbalance", description="➕ Add money to a customer"),
+    BotCommand(command="subbalance", description="➖ Deduct money from a customer"),
 ]
 
 

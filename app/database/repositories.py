@@ -302,3 +302,48 @@ async def delete_custom_text(db: Database, key: str, lang: Optional[str] = None)
         return await db.execute(
             "DELETE FROM custom_texts WHERE key = ? AND lang = ?", (key, lang))
     return await db.execute("DELETE FROM custom_texts WHERE key = ?", (key,))
+
+
+# ------------------------------------------- admin: change a customer's balance
+
+
+class InsufficientBalance(Exception):
+    """The deduction is bigger than what the customer has."""
+
+
+async def find_user_by_ref(db: Database, ref: str) -> Optional[dict]:
+    """Find a customer by Telegram ID (digits) or @username."""
+    ref = (ref or "").strip()
+    if ref.startswith("@"):
+        return await db.fetchone(
+            "SELECT * FROM users WHERE username = ? COLLATE NOCASE", (ref[1:],))
+    if ref.isdigit():
+        return await db.fetchone("SELECT * FROM users WHERE telegram_id = ?", (int(ref),))
+    return None
+
+
+async def adjust_balance(db: Database, user_id: int, delta_cents: int, note: str) -> int:
+    """Add (delta > 0) or take (delta < 0) money. Returns the new balance in cents.
+
+    Everything happens in ONE database transaction: the balance and the history line
+    are saved together or not at all. The balance can never go below zero."""
+    async with db.transaction() as conn:
+        cur = await conn.execute("SELECT balance_cents FROM users WHERE id = ?", (user_id,))
+        row = await cur.fetchone()
+        await cur.close()
+        if row is None:
+            raise LookupError("user not found")
+        new_balance = row["balance_cents"] + delta_cents
+        if new_balance < 0:
+            raise InsufficientBalance()
+        await conn.execute("UPDATE users SET balance_cents = ? WHERE id = ?",
+                           (new_balance, user_id))
+        # The transactions table only accepts deposit / purchase / refund, so a credit
+        # is saved as 'deposit' and a deduction as 'purchase'; the note says it was manual.
+        await conn.execute(
+            "INSERT INTO transactions (user_id, type, amount_cents, balance_after_cents, note) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (user_id, "deposit" if delta_cents > 0 else "purchase",
+             delta_cents, new_balance, note[:250]),
+        )
+    return new_balance
