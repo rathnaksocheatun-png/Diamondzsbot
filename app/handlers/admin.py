@@ -449,7 +449,9 @@ async def cb_reports(cb: CallbackQuery, db: Database):
         "<b>Money</b>",
         f"💰 Approved deposits: {r['deposits']['n']} • {money(r['deposits']['total'])}",
         f"⏳ Pending deposit requests: {r['pending_deposits']}",
-        f"👛 Total in customer wallets: {money(r['wallets_total'])}", "",
+        f"👛 Total in customer wallets: {money(r['wallets_total'])}",
+        f"➕ Added by admin: {r['manual_added']['n']} • {money(r['manual_added']['total'])}",
+        f"➖ Deducted by admin: {r['manual_deducted']['n']} • {money(r['manual_deducted']['total'])}", "",
         "<b>Completed sales by game</b>",
     ]
     for g in r["per_game"]:

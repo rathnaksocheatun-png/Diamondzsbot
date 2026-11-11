@@ -347,3 +347,20 @@ async def adjust_balance(db: Database, user_id: int, delta_cents: int, note: str
              delta_cents, new_balance, note[:250]),
         )
     return new_balance
+
+
+async def list_manual_adjustments(db: Database, user_id: Optional[int] = None,
+                                  limit: int = 15) -> list:
+    """Latest balance changes made by an admin (newest first), optionally for one customer."""
+    sql = (
+        "SELECT tr.created_at, tr.amount_cents, tr.balance_after_cents, tr.note, "
+        "u.telegram_id, u.full_name, u.username "
+        "FROM transactions tr JOIN users u ON u.id = tr.user_id "
+        "WHERE tr.note LIKE '[manual]%'"
+    )
+    params: tuple = ()
+    if user_id is not None:
+        sql += " AND tr.user_id = ?"
+        params = (user_id,)
+    sql += " ORDER BY tr.id DESC LIMIT ?"
+    return await db.fetchall(sql, params + (limit,))

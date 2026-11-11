@@ -25,7 +25,7 @@ from app.database import repositories as repo
 from app.database.db import Database
 from app.texts import t
 from app.utils.filters import IsAdmin
-from app.utils.formatting import esc, money
+from app.utils.formatting import esc, money, short_date
 from app.utils.telegram import notify_user
 
 log = logging.getLogger("diamond_zs.wallet_admin")
@@ -140,7 +140,7 @@ async def cb_decision(cb: CallbackQuery, db: Database, bot: Bot):
     try:
         new_balance = await repo.adjust_balance(
             db, job["user_id"], job["delta"],
-            f"Admin {job['admin']}" + (f": {job['note']}" if job["note"] else ""))
+            f"[manual] Admin {job['admin']}" + (f": {job['note']}" if job["note"] else ""))
     except repo.InsufficientBalance:
         await cb.answer("The customer no longer has enough money.", show_alert=True)
         await _edit(cb, "⚠️ Not done: the balance is now too low for this deduction.")
@@ -165,3 +165,31 @@ async def _edit(cb: CallbackQuery, text: str) -> None:
         await cb.message.edit_text(text, reply_markup=None)
     except TelegramBadRequest:
         await cb.message.answer(text)
+
+
+@router.message(Command("balancelog"))
+async def cmd_balancelog(message: Message, command: CommandObject, db: Database):
+    """/balancelog  -> last 15 manual changes;  /balancelog <id or @username> -> one customer."""
+    arg = (command.args or "").strip()
+    user_id = None
+    title = "🧾 <b>Manual balance changes</b> (latest 15)"
+    if arg:
+        user = await repo.find_user_by_ref(db, arg.split()[0])
+        if user is None:
+            await message.answer(f"⚠️ No customer found for <code>{esc(arg)}</code>.")
+            return
+        user_id = user["id"]
+        title = f"🧾 <b>Manual balance changes</b> — {_who(user)}"
+    rows = await repo.list_manual_adjustments(db, user_id)
+    if not rows:
+        await message.answer(title + "\n\nNothing yet.")
+        return
+    lines = [title, ""]
+    for r in rows:
+        sign = "+" if r["amount_cents"] > 0 else "-"
+        detail = r["note"].replace("[manual]", "", 1).strip()
+        who = "" if user_id is not None else f" {esc(r['full_name'] or '-')} (<code>{r['telegram_id']}</code>)"
+        lines.append(
+            f"{short_date(r['created_at'])} • <b>{sign}{money(abs(r['amount_cents']))}</b>{who}\n"
+            f"   → {money(r['balance_after_cents'])} • {esc(detail)}")
+    await message.answer("\n".join(lines))
