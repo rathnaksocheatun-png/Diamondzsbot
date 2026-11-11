@@ -19,6 +19,7 @@ from app.handlers import appearance, catalog as catalog_handlers
 from app.handlers import supplier
 from app.handlers import live_edit
 from app.handlers import wallet_admin
+from app.handlers import broadcast
 from app.services.bay2game import Bay2GameClient, Bay2GameError
 from app.services.catalog import watch_catalog
 from app.services.fulfilment import watch_stuck_orders
@@ -133,6 +134,7 @@ async def main() -> None:
     dp.include_router(start.router)     # /start, /menu, /cancel, language
     dp.include_router(live_edit.router)  # admin only: /emoji, /texts, /settext (works in any state)
     dp.include_router(wallet_admin.router)  # admin only: /addbalance, /subbalance
+    dp.include_router(broadcast.router)  # admin only: /broadcast (text / photo / video to all customers)
     dp.include_router(menu.router)      # all main-menu buttons
     dp.include_router(admin.router)     # admin only
     dp.include_router(supplier.router)  # admin only: Bay2Game commands

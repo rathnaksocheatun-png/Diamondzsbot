@@ -56,6 +56,7 @@ ADMIN_COMMANDS = [
     BotCommand(command="addbalance", description="➕ Add money to a customer"),
     BotCommand(command="subbalance", description="➖ Deduct money from a customer"),
     BotCommand(command="balancelog", description="🧾 Manual balance history"),
+    BotCommand(command="broadcast", description="📢 Send announcement to customers"),
 ]
 
 
