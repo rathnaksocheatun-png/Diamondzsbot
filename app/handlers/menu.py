@@ -11,7 +11,7 @@ from aiogram.types import Message
 
 from app.config import Settings
 from app.database.db import Database
-from app.handlers import info, shop, wallet
+from app.handlers import howto_video, info, shop, wallet
 from app.keyboards.user import language_kb
 from app.texts import menu_labels, t
 
@@ -68,8 +68,10 @@ async def menu_history(message: Message, state: FSMContext, db: Database, user: 
 
 @router.message(Command("howto"))
 @router.message(F.text.in_(menu_labels("howto")))
-async def menu_howto(message: Message, state: FSMContext, user: dict):
+async def menu_howto(message: Message, state: FSMContext, db: Database, user: dict):
     await state.clear()
+    # Tutorial video first (only if an admin set one with /howtovideo), then the text.
+    await howto_video.send_howto_video(message, db, user["language"])
     await info.show_howto(message, user["language"])
 
 
