@@ -20,6 +20,7 @@ Safety rules kept from the original working design:
 """
 import asyncio
 import base64
+import gzip
 import hashlib
 import hmac
 import io
@@ -44,6 +45,15 @@ BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 DEFAULT_API_URL = "https://link.payway.com.kh/api"
 LINK_RE = re.compile(r"^https://link\.payway\.com\.kh/[A-Za-z0-9]+/?$")
+
+# Plain, normal browser headers for loading the page (nothing more than a browser sends).
+PAGE_HEADERS = {
+    "User-Agent": BROWSER_UA,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip",
+    "Upgrade-Insecure-Requests": "1",
+}
 
 PAGE_REUSE_SECONDS = 60      # one page load can make many QRs (each has its own Tran ID)
 COOLDOWN_SECONDS = 45        # no page loads for this long after a 429
@@ -301,11 +311,20 @@ class PaywayClient:
                    timeout: int) -> tuple:
         data = json.dumps(body).encode() if body is not None else None
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
+
+        def decode(raw: bytes, headers) -> str:
+            if (headers.get("Content-Encoding") or "").lower() == "gzip":
+                try:
+                    raw = gzip.decompress(raw)
+                except OSError:
+                    pass
+            return raw.decode("utf-8", "replace")
+
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return resp.status, resp.read().decode("utf-8", "replace")
+                return resp.status, decode(resp.read(), resp.headers)
         except urllib.error.HTTPError as exc:
-            return exc.code, exc.read().decode("utf-8", "replace")
+            return exc.code, decode(exc.read(), exc.headers)
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             raise KhpayError(f"PayWay unreachable: {type(exc).__name__}") from None
 
@@ -331,13 +350,18 @@ class PaywayClient:
     # ---- the link page (reused, paused after a 429) ---------------------------
 
     async def _load_page(self, link: str) -> LinkPage:
-        status, text = await self._http("GET", link, {"User-Agent": BROWSER_UA})
+        status, text = await self._http("GET", link, PAGE_HEADERS)
+        if status >= 400:
+            # A short look at what the other side said helps to tell Cloudflare from ABA.
+            snippet = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text))[:200]
+            log.warning("[PayWay] link page HTTP %s: %s", status, snippet)
         if status == 429:
             self._blocked_until = time.monotonic() + COOLDOWN_SECONDS
             log.warning("[PayWay] link page answered 429 - no page loads for %ss", COOLDOWN_SECONDS)
             raise KhpayError("PayWay link page is rate limited (429)", code="429", http_status=429)
         if status >= 400:
-            raise KhpayError(f"PayWay link page error (HTTP {status})", http_status=status)
+            raise KhpayError(f"PayWay link page error (HTTP {status})",
+                             code=str(status), http_status=status)
         return parse_link_page(text, link)
 
     async def _get_page(self, link: str, fresh: bool = False) -> tuple:

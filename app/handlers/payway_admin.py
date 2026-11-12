@@ -84,6 +84,9 @@ async def cmd_test(message: Message, bot: Bot, khpay: Optional[PaywayClient] = N
         await message.answer(
             f"❌ PayWay test failed:\n<code>{esc(str(exc))}</code>\n\n"
             + ("Too many page loads. Wait a minute and try again." if exc.code == "429"
+               else "ABA refused this server (403). It is blocking the bot's server address, "
+                    "not a mistake in your link. Look at the Railway logs for the line "
+                    "starting with [PayWay]." if exc.code == "403"
                else "Check the link with /payway_link and the Railway logs."))
         return
     photo = online_payments.qr_photo(qr)
