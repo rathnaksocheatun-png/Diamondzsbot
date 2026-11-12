@@ -5,7 +5,7 @@ from typing import Optional
 from aiogram import F, Bot, Router
 from aiogram.exceptions import TelegramAPIError
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from app.config import Settings
 from app.database import repositories as repo
@@ -125,7 +125,15 @@ async def on_deposit_amount(
     )
 
 
-# ------------------------------------------------- automatic payments (KHPAY)
+# ------------------------------------------------- automatic payments (PayWay)
+
+
+def _qr_kb_no_link(lang: str, deposit_id: int) -> InlineKeyboardMarkup:
+    """Check payment + Cancel (same buttons as before, without the 'open page' link)."""
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text=t(lang, "btn_check_payment"), callback_data=f"dep:chk:{deposit_id}"),
+        InlineKeyboardButton(text=t(lang, "btn_cancel"), callback_data=f"dep:cancel:{deposit_id}"),
+    ]])
 
 
 async def _auto_deposit(
@@ -146,22 +154,26 @@ async def _auto_deposit(
         ))
         return
     except KhpayError as exc:
-        log.warning("Could not create KHPAY payment: %s (code=%s)", exc, exc.code)
+        log.warning("Could not create PayWay payment: %s (code=%s)", exc, exc.code)
         await state.clear()
         await message.answer(t(lang, "deposit_gateway_error", support=support))
         return
     await state.clear()
     caption = t(lang, "deposit_qr_caption", id=deposit_id, amount=money(cents),
                 seconds=qr.expires_in)
-    markup = deposit_qr_kb(lang, deposit_id, qr.payment_url)
+    markup = (deposit_qr_kb(lang, deposit_id, qr.payment_url) if qr.payment_url
+              else _qr_kb_no_link(lang, deposit_id))   # PayWay has no web page to open
     photo = online_payments.qr_photo(qr)
+    sent = None
     try:
         if photo is not None:
-            await message.answer_photo(photo, caption=caption, reply_markup=markup)
-            return
+            sent = await message.answer_photo(photo, caption=caption, reply_markup=markup)
     except TelegramAPIError:
         log.warning("Could not send QR photo", exc_info=True)
-    await message.answer(caption, reply_markup=markup)
+    if sent is None:
+        sent = await message.answer(caption, reply_markup=markup)
+    # So the bot can delete this QR automatically when the deposit is paid / expired / cancelled.
+    await online_payments.remember_qr_message(db, deposit_id, sent.chat.id, sent.message_id)
 
 
 @router.callback_query(F.data.regexp(r"^dep:(chk|cancel):\d+$"))
@@ -199,4 +211,4 @@ async def cb_deposit_action(
         except TelegramAPIError:
             pass
     if outcome.kind != "already":
-        await online_payments.announce_outcome(bot, settings, dep, outcome)
+        await online_payments.announce_outcome(bot, settings, dep, outcome, db)

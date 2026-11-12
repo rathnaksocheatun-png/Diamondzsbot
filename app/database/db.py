@@ -100,6 +100,24 @@ CREATE TABLE IF NOT EXISTS supplier_removed (
     PRIMARY KEY (supplier_game, supplier_code)
 );
 
+-- The QR message sent to the customer, so the bot can delete it when the deposit is finished.
+CREATE TABLE IF NOT EXISTS deposit_qr_messages (
+    deposit_id INTEGER PRIMARY KEY,
+    chat_id    INTEGER NOT NULL,
+    message_id INTEGER NOT NULL
+);
+
+-- PayWay: what is needed to ask ABA "was this QR paid?" (one row per QR, survives restarts).
+CREATE TABLE IF NOT EXISTS payway_sessions (
+    tran_id      TEXT PRIMARY KEY,
+    client_id    TEXT NOT NULL,
+    device_id    TEXT NOT NULL,
+    request_time TEXT NOT NULL,
+    token        TEXT NOT NULL,
+    payway_url   TEXT NOT NULL,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Premium (animated) emoji the admin set from inside the bot (/emoji).
 CREATE TABLE IF NOT EXISTS custom_emojis (
     emoji      TEXT PRIMARY KEY,

@@ -13,6 +13,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import ErrorEvent
 
 from app.config import ConfigError, load_settings
+from app.database import repositories as repo
 from app.database.db import Database
 from app.handlers import admin, fallback, menu, shop, start, wallet
 from app.handlers import appearance, catalog as catalog_handlers
@@ -21,11 +22,13 @@ from app.handlers import live_edit
 from app.handlers import wallet_admin
 from app.handlers import broadcast
 from app.handlers import howto_video
+from app.handlers import payway_admin
 from app.services.bay2game import Bay2GameClient, Bay2GameError
 from app.services.catalog import watch_catalog
 from app.services.fulfilment import watch_stuck_orders
 from app.services.pricing import watch_prices
-from app.services.khpay import KhpayClient, KhpayError
+from app.services.khpay import KhpayError
+from app.services.payway import PaywayClient
 from app.utils.commands import setup_commands
 from app.utils.custom_emoji import CustomEmojiMiddleware, load_mapping
 from app.utils.emoji_store import EmojiStore, LiveEmojiMiddleware
@@ -42,20 +45,23 @@ async def on_error(event: ErrorEvent) -> bool:
     return True
 
 
-async def _check_khpay(bot: Bot, settings, khpay: KhpayClient) -> None:
-    """Warn the admins at start-up if KHPAY is not ready (the bot keeps running)."""
+async def _check_payway(bot: Bot, settings, client: PaywayClient) -> None:
+    """Warn the admins at start-up if PayWay is not ready (the bot keeps running)."""
     try:
-        info = await khpay.account_info()
-    except KhpayError as exc:
-        log.error("KHPAY check failed: %s", exc)
-        await notify_admins(bot, settings, "⚠️ KHPAY key check failed - automatic deposits "
-                            "will not work until this is fixed. Check KHPAY_API_KEY.")
+        import qrcode  # noqa: F401
+    except ImportError:
+        log.error("qrcode library is missing")
+        await notify_admins(bot, settings, "⚠️ PayWay: the QR library is missing. Add "
+                            "<code>qrcode[pil]</code> to requirements.txt and redeploy.")
         return
-    if not (info.get("payway_link_set") and info.get("aba_available")):
-        log.error("KHPAY account is not ready: %s", info)
-        await notify_admins(bot, settings, "⚠️ KHPAY says your ABA PayWay link is not set up "
-                            "yet. Automatic deposits will fail until you connect it in the "
-                            "KHPAY dashboard.")
+    try:
+        name = await client.self_test()
+        log.info("PayWay link OK (%s)", name)
+    except KhpayError as exc:
+        log.error("PayWay check failed: %s", exc)
+        await notify_admins(bot, settings, f"⚠️ PayWay check failed: <code>{exc}</code>\n"
+                            "Automatic deposits may not work. Run /payway_test or check "
+                            "/payway_link.")
 
 
 async def _check_bay2game(bot: Bot, settings, b2g: Bay2GameClient) -> None:
@@ -113,12 +119,17 @@ async def main() -> None:
     dp["db"] = db
     dp["emoji_store"] = emoji_store
     dp["settings"] = settings
-    # Automatic payments are ON only when KHPAY_API_KEY is set.
-    khpay = (
-        KhpayClient(settings.khpay_api_key, settings.khpay_base_url, settings.khpay_test_mode)
-        if settings.khpay_api_key else None
-    )
+    # Automatic payments (ABA PayWay) are ON only when a PayWay link is set, either with the
+    # admin command /payway_link or the PAYWAY_LINK_URL variable. The name "khpay" is kept
+    # for the handlers (wallet.py) - the object is now the PayWay client.
+    payway_link = ((await repo.get_setting(db, "payway_link"))
+                   or os.getenv("PAYWAY_LINK_URL", "")).strip()
+    khpay = (PaywayClient(db, payway_link, os.getenv("PAYWAY_API_URL", ""))
+             if payway_link else None)
     dp["khpay"] = khpay
+    # Old KHPAY deposits can never be settled any more: close them so they do not block customers.
+    await db.execute("UPDATE deposit_requests SET status = 'rejected', decided_at = datetime('now') "
+                     "WHERE status = 'pending' AND provider = 'khpay'")
     # Automatic diamond delivery is ON only when BAY2GAME_API_KEY is set.
     b2g = (
         Bay2GameClient(settings.bay2game_api_key, settings.bay2game_base_url,
@@ -137,6 +148,7 @@ async def main() -> None:
     dp.include_router(wallet_admin.router)  # admin only: /addbalance, /subbalance
     dp.include_router(broadcast.router)  # admin only: /broadcast (text / photo / video to all customers)
     dp.include_router(howto_video.router)  # admin only: /howtovideo (tutorial video for "How to Use")
+    dp.include_router(payway_admin.router)  # admin only: /payway_link, /payway_test
     dp.include_router(menu.router)      # all main-menu buttons
     dp.include_router(admin.router)     # admin only
     dp.include_router(supplier.router)  # admin only: Bay2Game commands
@@ -156,10 +168,9 @@ async def main() -> None:
         await bot.delete_webhook(drop_pending_updates=True)
         await setup_commands(bot, settings)  # Telegram "Menu" list (customers + admins)
         if khpay is not None:
-            await _check_khpay(bot, settings, khpay)
+            await _check_payway(bot, settings, khpay)
             watcher = asyncio.create_task(watch_payments(bot, db, khpay, settings))
-            log.info("Automatic payments (KHPAY) are ON%s",
-                     " - TEST MODE" if settings.khpay_test_mode else "")
+            log.info("Automatic payments (ABA PayWay) are ON")
         else:
             log.info("Automatic payments are OFF - deposits are approved by an admin")
         if b2g is not None:

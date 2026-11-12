@@ -58,6 +58,8 @@ ADMIN_COMMANDS = [
     BotCommand(command="balancelog", description="🧾 Manual balance history"),
     BotCommand(command="broadcast", description="📢 Send announcement to customers"),
     BotCommand(command="howtovideo", description="🎬 Set the how-to video"),
+    BotCommand(command="payway_link", description="💳 PayWay link"),
+    BotCommand(command="payway_test", description="🧪 Test PayWay ($0.01)"),
 ]
 
 

@@ -1,9 +1,9 @@
-"""Automatic deposits through KHPAY.
+"""Automatic deposits through ABA PayWay (KHQR).
 
 Safety rules built into this file:
-  * A wallet is credited ONLY after KHPAY itself says "paid" when WE ask it
+  * A wallet is credited ONLY after PayWay itself says "approved" when WE ask it
     (we never trust a redirect, a screenshot or a user message).
-  * The amount KHPAY reports must equal the amount we asked for.
+  * The amount inside the KHQR was checked when it was created (see payway.py).
   * Crediting reuses wallet.approve_deposit, which flips the deposit from
     'pending' to 'approved' atomically - so the same payment can never be
     credited twice, even if the watcher and a button press race each other.
@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramAPIError
 from aiogram.types import BufferedInputFile
 
 from app.config import Settings
@@ -30,11 +31,13 @@ from app.utils.telegram import notify_admins, notify_user
 
 log = logging.getLogger(__name__)
 
-PROVIDER = "khpay"
-# KHPAY QR codes live ~180 s. We keep checking a little longer than that so a
+PROVIDER = "payway"
+# PayWay QR codes live ~180 s. We keep checking a little longer than that so a
 # payment made in the last second is never missed.
-GRACE_SECONDS = 120
-WATCH_INTERVAL = 4.0
+# The QR is closed exactly when its time is up (3 minutes). A payment made just before that is
+  # still caught: settle_deposit always asks PayWay one last time before it gives up.
+GRACE_SECONDS = 0
+WATCH_INTERVAL = 5.0    # seconds between checks (the customer can press "Check payment" any time)
 MAX_PARALLEL_CHECKS = 8
 
 
@@ -43,6 +46,32 @@ class Outcome:
     kind: str                 # credited | pending | expired | failed | mismatch | already | error
     balance_cents: int = 0
     detail: str = ""
+
+
+# ------------------------------------------------------------ the QR message
+
+
+async def remember_qr_message(db: Database, deposit_id: int, chat_id: int, message_id: int) -> None:
+    """Remember which chat message shows the QR, so it can be deleted later."""
+    await db.execute(
+        "INSERT OR REPLACE INTO deposit_qr_messages (deposit_id, chat_id, message_id) "
+        "VALUES (?, ?, ?)", (deposit_id, chat_id, message_id))
+
+
+async def delete_qr_message(bot: Bot, db: Database, deposit_id: int) -> None:
+    """Delete the QR message (paid, expired or cancelled). Never raises."""
+    try:
+        row = await db.fetchone(
+            "SELECT chat_id, message_id FROM deposit_qr_messages WHERE deposit_id = ?",
+            (deposit_id,))
+        if row is None:
+            return
+        await db.execute("DELETE FROM deposit_qr_messages WHERE deposit_id = ?", (deposit_id,))
+        await bot.delete_message(row["chat_id"], row["message_id"])
+    except TelegramAPIError:
+        log.info("Could not delete the QR message of deposit #%s (already gone?)", deposit_id)
+    except Exception:
+        log.exception("Error while deleting the QR message of deposit #%s", deposit_id)
 
 
 # --------------------------------------------------------------- start / cancel
@@ -142,7 +171,7 @@ async def _mark_rejected(db: Database, deposit_id: int) -> bool:
 
 
 async def settle_deposit(db: Database, client: KhpayClient, deposit_id: int) -> Outcome:
-    """Ask KHPAY about one pending online deposit and act on the answer."""
+    """Ask PayWay about one pending online deposit and act on the answer."""
     dep = await _get(db, deposit_id)
     if dep is None or dep["status"] != "pending" or dep["provider"] != PROVIDER:
         return Outcome("already")
@@ -157,7 +186,7 @@ async def settle_deposit(db: Database, client: KhpayClient, deposit_id: int) -> 
     try:
         status = await client.check(dep["external_id"])
     except KhpayError as exc:
-        log.warning("KHPAY check failed for deposit #%s: %s", deposit_id, exc)
+        log.warning("PayWay check failed for deposit #%s: %s", deposit_id, exc)
         return Outcome("error", detail=str(exc))
 
     if status.paid:
@@ -196,9 +225,13 @@ async def settle_deposit(db: Database, client: KhpayClient, deposit_id: int) -> 
 
 
 async def announce_outcome(
-    bot: Bot, settings: Settings, dep: dict, outcome: Outcome
+    bot: Bot, settings: Settings, dep: dict, outcome: Outcome,
+    db: Optional[Database] = None,
 ) -> None:
-    """Tell the customer (and admins when useful). Safe to call for any outcome."""
+    """Tell the customer (and admins when useful). Safe to call for any outcome.
+    The QR message is deleted first, so a finished deposit leaves no old QR in the chat."""
+    if db is not None and outcome.kind in ("credited", "expired", "failed", "mismatch"):
+        await delete_qr_message(bot, db, dep["id"])
     lang = dep["user_language"]
     chat_id = dep["user_telegram_id"]
     amount = money(dep["amount_cents"])
@@ -224,7 +257,7 @@ async def announce_outcome(
         await notify_admins(
             bot, settings,
             f"⚠️ <b>Deposit #{dep['id']} NOT credited - amount mismatch.</b>\n"
-            f"{esc(outcome.detail)}\nCheck your KHPAY dashboard and handle it manually.",
+            f"{esc(outcome.detail)}\nCheck your ABA app and handle it manually.",
         )
 
 
@@ -248,7 +281,7 @@ async def watch_payments(
                 if outcome.kind in ("credited", "expired", "failed", "mismatch"):
                     dep = await _get(db, deposit_id)
                     if dep is not None:
-                        await announce_outcome(bot, settings, dep, outcome)
+                        await announce_outcome(bot, settings, dep, outcome, db)
             except Exception:
                 log.exception("Unexpected error while settling deposit #%s", deposit_id)
 
