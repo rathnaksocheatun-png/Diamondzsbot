@@ -22,12 +22,14 @@ from app.handlers import live_edit
 from app.handlers import wallet_admin
 from app.handlers import broadcast
 from app.handlers import howto_video
+from app.handlers import bakong_admin
 from app.handlers import payway_admin
 from app.services.bay2game import Bay2GameClient, Bay2GameError
 from app.services.catalog import watch_catalog
 from app.services.fulfilment import watch_stuck_orders
 from app.services.pricing import watch_prices
 from app.services.khpay import KhpayError
+from app.services.bakong import TOKEN_SETTING, BakongClient
 from app.services.payway import PaywayClient
 from app.utils.commands import setup_commands
 from app.utils.custom_emoji import CustomEmojiMiddleware, load_mapping
@@ -45,8 +47,8 @@ async def on_error(event: ErrorEvent) -> bool:
     return True
 
 
-async def _check_payway(bot: Bot, settings, client: PaywayClient) -> None:
-    """Warn the admins at start-up if PayWay is not ready (the bot keeps running)."""
+async def _check_payway(bot: Bot, settings, client) -> None:
+    """Warn the admins at start-up if the payment gateway is not ready (the bot keeps running)."""
     try:
         import qrcode  # noqa: F401
     except ImportError:
@@ -56,12 +58,11 @@ async def _check_payway(bot: Bot, settings, client: PaywayClient) -> None:
         return
     try:
         name = await client.self_test()
-        log.info("PayWay link OK (%s)", name)
+        log.info("Payment gateway OK (%s)", name)
     except KhpayError as exc:
-        log.error("PayWay check failed: %s", exc)
-        await notify_admins(bot, settings, f"⚠️ PayWay check failed: <code>{exc}</code>\n"
-                            "Automatic deposits may not work. Run /payway_test or check "
-                            "/payway_link.")
+        log.error("Payment gateway check failed: %s", exc)
+        await notify_admins(bot, settings, f"⚠️ Payment check failed: <code>{exc}</code>\n"
+                            "Automatic deposits may not work. Run /bakong_test or check /bakong.")
 
 
 async def _check_bay2game(bot: Bot, settings, b2g: Bay2GameClient) -> None:
@@ -122,14 +123,24 @@ async def main() -> None:
     # Automatic payments (ABA PayWay) are ON only when a PayWay link is set, either with the
     # admin command /payway_link or the PAYWAY_LINK_URL variable. The name "khpay" is kept
     # for the handlers (wallet.py) - the object is now the PayWay client.
+    bakong_account = os.getenv("BAKONG_ACCOUNT_ID", "").strip()
+    bakong_token = ((await repo.get_setting(db, TOKEN_SETTING))
+                    or os.getenv("BAKONG_TOKEN", "")).strip()
     payway_link = ((await repo.get_setting(db, "payway_link"))
                    or os.getenv("PAYWAY_LINK_URL", "")).strip()
-    khpay = (PaywayClient(db, payway_link, os.getenv("PAYWAY_API_URL", ""))
-             if payway_link else None)
+    if bakong_account and bakong_token:       # official Bakong API (preferred)
+        khpay = BakongClient(
+            db, bakong_account, os.getenv("BAKONG_MERCHANT_NAME", "Diamond ZS"),
+            os.getenv("BAKONG_MERCHANT_CITY", "Phnom Penh"), bakong_token,
+            os.getenv("BAKONG_EMAIL", ""), os.getenv("BAKONG_API_URL", ""))
+    elif payway_link:                         # old PayWay link method (blocked by Cloudflare on most servers)
+        khpay = PaywayClient(db, payway_link, os.getenv("PAYWAY_API_URL", ""))
+    else:
+        khpay = None
     dp["khpay"] = khpay
     # Old KHPAY deposits can never be settled any more: close them so they do not block customers.
     await db.execute("UPDATE deposit_requests SET status = 'rejected', decided_at = datetime('now') "
-                     "WHERE status = 'pending' AND provider = 'khpay'")
+                     "WHERE status = 'pending' AND provider IN ('khpay', 'payway')")
     # Automatic diamond delivery is ON only when BAY2GAME_API_KEY is set.
     b2g = (
         Bay2GameClient(settings.bay2game_api_key, settings.bay2game_base_url,
@@ -148,7 +159,8 @@ async def main() -> None:
     dp.include_router(wallet_admin.router)  # admin only: /addbalance, /subbalance
     dp.include_router(broadcast.router)  # admin only: /broadcast (text / photo / video to all customers)
     dp.include_router(howto_video.router)  # admin only: /howtovideo (tutorial video for "How to Use")
-    dp.include_router(payway_admin.router)  # admin only: /payway_link, /payway_test
+    dp.include_router(payway_admin.router)  # admin only: /payway_test, /bakong_test
+    dp.include_router(bakong_admin.router)  # admin only: /bakong, /bakong_token
     dp.include_router(menu.router)      # all main-menu buttons
     dp.include_router(admin.router)     # admin only
     dp.include_router(supplier.router)  # admin only: Bay2Game commands
@@ -170,7 +182,7 @@ async def main() -> None:
         if khpay is not None:
             await _check_payway(bot, settings, khpay)
             watcher = asyncio.create_task(watch_payments(bot, db, khpay, settings))
-            log.info("Automatic payments (ABA PayWay) are ON")
+            log.info("Automatic payments (%s) are ON", type(khpay).__name__)
         else:
             log.info("Automatic payments are OFF - deposits are approved by an admin")
         if b2g is not None:

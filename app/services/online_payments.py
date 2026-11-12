@@ -1,9 +1,9 @@
-"""Automatic deposits through ABA PayWay (KHQR).
+"""Automatic deposits through KHQR (Bakong).
 
 Safety rules built into this file:
-  * A wallet is credited ONLY after PayWay itself says "approved" when WE ask it
+  * A wallet is credited ONLY after the gateway itself says "approved" when WE ask it
     (we never trust a redirect, a screenshot or a user message).
-  * The amount inside the KHQR was checked when it was created (see payway.py).
+  * The gateway's amount and currency must match what we asked (Bakong reports both).
   * Crediting reuses wallet.approve_deposit, which flips the deposit from
     'pending' to 'approved' atomically - so the same payment can never be
     credited twice, even if the watcher and a button press race each other.
@@ -31,7 +31,7 @@ from app.utils.telegram import notify_admins, notify_user
 
 log = logging.getLogger(__name__)
 
-PROVIDER = "payway"
+PROVIDER = "khqr"   # used for every KHQR gateway (Bakong, PayWay)
 # PayWay QR codes live ~180 s. We keep checking a little longer than that so a
 # payment made in the last second is never missed.
 # The QR is closed exactly when its time is up (3 minutes). A payment made just before that is
@@ -171,7 +171,7 @@ async def _mark_rejected(db: Database, deposit_id: int) -> bool:
 
 
 async def settle_deposit(db: Database, client: KhpayClient, deposit_id: int) -> Outcome:
-    """Ask PayWay about one pending online deposit and act on the answer."""
+    """Ask the gateway about one pending online deposit and act on the answer."""
     dep = await _get(db, deposit_id)
     if dep is None or dep["status"] != "pending" or dep["provider"] != PROVIDER:
         return Outcome("already")
@@ -186,7 +186,7 @@ async def settle_deposit(db: Database, client: KhpayClient, deposit_id: int) -> 
     try:
         status = await client.check(dep["external_id"])
     except KhpayError as exc:
-        log.warning("PayWay check failed for deposit #%s: %s", deposit_id, exc)
+        log.warning("Payment check failed for deposit #%s: %s", deposit_id, exc)
         return Outcome("error", detail=str(exc))
 
     if status.paid:

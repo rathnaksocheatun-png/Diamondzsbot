@@ -41,6 +41,9 @@ NOT_ON = ("⚠️ Automatic PayWay deposits are OFF because no link is set.\n"
 @router.message(Command("payway_link"))
 async def cmd_link(message: Message, command: CommandObject, db: Database,
                    khpay: Optional[PaywayClient] = None):
+    if khpay is not None and not hasattr(khpay, "set_link"):
+        await message.answer("Payments now use Bakong, not a PayWay link. See /bakong.")
+        return
     arg = (command.args or "").strip()
     if not arg:
         current = khpay.link if khpay is not None else \
@@ -67,7 +70,7 @@ async def cmd_link(message: Message, command: CommandObject, db: Database,
     await message.answer("✅ Link changed and active now. Run /payway_test to check it.")
 
 
-@router.message(Command("payway_test"))
+@router.message(Command("payway_test", "bakong_test"))
 async def cmd_test(message: Message, bot: Bot, khpay: Optional[PaywayClient] = None):
     global _testing
     if khpay is None:
@@ -76,23 +79,23 @@ async def cmd_test(message: Message, bot: Bot, khpay: Optional[PaywayClient] = N
     if _testing:
         await message.answer("A test is already running. Please wait for it to finish.")
         return
-    await message.answer("⏳ Contacting PayWay…")
+    await message.answer("⏳ Contacting the payment service…")
     try:
         merchant = await khpay.self_test()
         qr = await khpay.generate_qr(1, "Admin test", {}, "payway-test")
     except KhpayError as exc:
         await message.answer(
-            f"❌ PayWay test failed:\n<code>{esc(str(exc))}</code>\n\n"
+            f"❌ Payment test failed:\n<code>{esc(str(exc))}</code>\n\n"
             + ("Too many page loads. Wait a minute and try again." if exc.code == "429"
-               else "ABA refused this server (403). It is blocking the bot's server address, "
-                    "not a mistake in your link. Look at the Railway logs for the line "
-                    "starting with [PayWay]." if exc.code == "403"
-               else "Check the link with /payway_link and the Railway logs."))
+               else "The service refused this server (403). It is blocking the bot's server "
+                    "address, not a mistake in your settings. Look at the Railway logs." if exc.code == "403"
+               else "Token problem. Send a new one with /bakong_token." if exc.code == "token"
+               else "Check your settings (/bakong) and the Railway logs."))
         return
     photo = online_payments.qr_photo(qr)
-    caption = (f"✅ PayWay works.\nAccount name: <b>{esc(merchant)}</b>\n"
+    caption = (f"✅ Connection works.\nAccount: <b>{esc(merchant)}</b>\n"
                f"This is a TEST KHQR for <b>$0.01</b> (Tran <code>{esc(qr.transaction_id)}</code>).\n"
-               "Pay it with ABA Mobile and I will tell you when I see the payment. "
+               "Pay it with ABA Mobile (check that the receiver name is YOURS) and I will tell you when I see the payment. "
                "Your wallet and customers are not touched. Watching for 3 minutes.")
     if photo is not None:
         await message.answer_photo(photo, caption=caption)
