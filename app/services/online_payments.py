@@ -27,7 +27,7 @@ from app.services.errors import DuplicateDeposit, NotFoundOrAlreadyHandled
 from app.services.khpay import KhpayClient, KhpayError, QrPayment, cents_to_amount
 from app.texts import t
 from app.utils.formatting import esc, money
-from app.utils.telegram import notify_admins, notify_user
+from app.utils.telegram import notify_admins, notify_group, notify_user
 
 log = logging.getLogger(__name__)
 
@@ -246,9 +246,17 @@ async def announce_outcome(
             f"✅ Auto deposit #{dep['id']} credited: <b>{amount}</b> to {who} "
             f"(ID <code>{chat_id}</code>).",
         )
+        await notify_group(
+            bot, settings, "payments",
+            f"💰 <b>Deposit #{dep['id']} credited</b>: {amount} - {who} "
+            f"(ID <code>{chat_id}</code>)",
+        )
     elif outcome.kind in ("expired", "failed"):
         key = "deposit_cancelled_user" if outcome.detail == "cancelled" else "deposit_expired_user"
         await notify_user(bot, chat_id, t(lang, key, id=dep["id"], amount=amount))
+        if outcome.detail != "cancelled":
+            await notify_group(bot, settings, "payments",
+                               f"⌛ Deposit #{dep['id']} ({amount}) closed - not paid.")
     elif outcome.kind == "mismatch":
         await notify_user(bot, chat_id, t(
             lang, "deposit_mismatch_user", id=dep["id"],
@@ -258,6 +266,11 @@ async def announce_outcome(
             bot, settings,
             f"⚠️ <b>Deposit #{dep['id']} NOT credited - amount mismatch.</b>\n"
             f"{esc(outcome.detail)}\nCheck your ABA app and handle it manually.",
+        )
+        await notify_group(
+            bot, settings, "payments",
+            f"⚠️ <b>Deposit #{dep['id']} NOT credited</b> - amount mismatch ({amount}). "
+            "Check it manually.",
         )
 
 

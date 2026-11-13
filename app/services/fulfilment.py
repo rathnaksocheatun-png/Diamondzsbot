@@ -30,7 +30,7 @@ from app.services.bay2game import (
 from app.services.errors import NotFoundOrAlreadyHandled
 from app.texts import t
 from app.utils.formatting import esc, money
-from app.utils.telegram import notify_admins, notify_user
+from app.utils.telegram import notify_admins, notify_group, notify_user
 
 log = logging.getLogger(__name__)
 
@@ -187,6 +187,12 @@ async def resolve_by_check(db: Database, client: Bay2GameClient, order_id: int,
 # ------------------------------------------------------------------ notifications
 
 
+def _order_line(order: dict) -> str:
+    """Two short lines describing an order for the orders group."""
+    return (f"{esc(order['game_name'])} - {esc(order['product_name'])}\n"
+            f"Player ID: <code>{esc(order['player_id'])}</code> | {money(order['price_cents'])}")
+
+
 async def announce(bot: Bot, settings: Settings, order: dict, outcome: Outcome) -> None:
     lang = order["user_language"]
     chat = order["user_telegram_id"]
@@ -201,6 +207,8 @@ async def announce(bot: Bot, settings: Settings, order: dict, outcome: Outcome) 
             if bal < settings.bay2game_low_balance_cents:
                 text += "\n⚠️ <b>Low balance - top up Bay2Game soon, or orders will stop.</b>"
         await notify_admins(bot, settings, text)
+        await notify_group(bot, settings, "orders",
+                           f"✅ <b>Delivered</b> - order #{oid}\n{_order_line(order)}")
     elif outcome.kind == "refunded":
         await notify_user(bot, chat, t(
             lang, "order_cancelled_user", id=oid, product=product,
@@ -208,6 +216,9 @@ async def announce(bot: Bot, settings: Settings, order: dict, outcome: Outcome) 
         await notify_admins(
             bot, settings,
             f"↩️ Order #{oid} ({product}) was refunded automatically.\nReason: {esc(outcome.detail)}")
+        await notify_group(bot, settings, "orders",
+                           f"↩️ <b>Refunded</b> - order #{oid}\n{_order_line(order)}\n"
+                           f"Reason: {esc(outcome.detail)}")
     elif outcome.kind == "review":
         await notify_user(bot, chat, t(lang, "order_review_user", id=oid, product=product))
         await notify_admins(
@@ -216,6 +227,9 @@ async def announce(bot: Bot, settings: Settings, order: dict, outcome: Outcome) 
             "The customer's money is still held. Check it, then complete or cancel the order.",
             reply_markup=view_order_kb(oid),
         )
+        await notify_group(bot, settings, "orders",
+                           f"⚠️ <b>Needs attention</b> - order #{oid}\n{_order_line(order)}\n"
+                           f"{esc(outcome.detail)}")
 
 
 async def run_fulfilment(bot: Bot, db: Database, client: Bay2GameClient,
@@ -235,6 +249,9 @@ async def run_fulfilment(bot: Bot, db: Database, client: Bay2GameClient,
                 f"{esc(order['game_name'])} - {esc(order['product_name'])}\n"
                 f"Player ID: <code>{esc(order['player_id'])}</code>",
                 reply_markup=view_order_kb(order_id))
+            await notify_group(bot, settings, "orders",
+                               f"🆕 <b>New order #{order_id}</b> - manual delivery needed\n"
+                               f"{_order_line(order)}")
     except Exception:
         log.exception("Unexpected error while delivering order #%s", order_id)
         try:

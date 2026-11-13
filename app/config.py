@@ -27,6 +27,8 @@ class Settings:
     bay2game_method: str = "POST"
     bay2game_ref_prefix: str = "DZS"
     bay2game_low_balance_cents: int = 1000
+    orders_chat_id: int = 0          # 0 = no orders group; else notices are posted there
+    payments_chat_id: int = 0        # 0 = no payments group
 
 
 def _parse_admin_ids(raw: str) -> frozenset:
@@ -41,6 +43,16 @@ def _parse_admin_ids(raw: str) -> frozenset:
             )
         ids.add(int(part))
     return frozenset(ids)
+
+
+def _parse_chat_id(name: str) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return 0
+    try:
+        return int(raw)
+    except ValueError:
+        raise ConfigError(f"{name} must be a number like -1001234567890. Got: {raw!r}")
 
 
 def load_settings() -> Settings:
@@ -98,4 +110,6 @@ def load_settings() -> Settings:
         bay2game_method="GET" if os.getenv("BAY2GAME_METHOD", "").strip().upper() == "GET" else "POST",
         bay2game_ref_prefix=("".join(c for c in os.getenv("BAY2GAME_REF_PREFIX", "DZS") if c.isalnum()) or "DZS")[:12],
         bay2game_low_balance_cents=low_balance,
+        orders_chat_id=_parse_chat_id("ORDERS_CHAT_ID"),
+        payments_chat_id=_parse_chat_id("PAYMENTS_CHAT_ID"),
     )

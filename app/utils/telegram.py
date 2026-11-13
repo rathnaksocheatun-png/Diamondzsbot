@@ -45,3 +45,21 @@ async def notify_admins(
             await bot.send_message(admin_id, text, reply_markup=reply_markup)
         except TelegramAPIError:
             log.warning("Could not notify admin %s", admin_id)
+
+
+async def notify_group(
+    bot: Bot, settings: Settings, kind: str, text: str,
+    reply_markup: Optional[InlineKeyboardMarkup] = None,
+) -> None:
+    """Post to the orders or payments group. kind = "orders" or "payments".
+
+    Does nothing if that group is not configured, and never raises, so a
+    problem with the group can never break an order or a deposit.
+    """
+    chat_id = settings.orders_chat_id if kind == "orders" else settings.payments_chat_id
+    if not chat_id:
+        return
+    try:
+        await bot.send_message(chat_id, text, reply_markup=reply_markup)
+    except TelegramAPIError:
+        log.warning("Could not post to the %s group (%s)", kind, chat_id)
