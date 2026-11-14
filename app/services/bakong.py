@@ -28,6 +28,7 @@ import time
 import urllib.error
 import urllib.request
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 from typing import Optional
 
 from app.database.db import Database
@@ -40,6 +41,54 @@ DEFAULT_API_URL = "https://api-bakong.nbc.gov.kh"
 TOKEN_SETTING = "bakong_token"
 QR_LIFETIME_SECONDS = 180
 USER_AGENT = "diamond-zs-bot/1.0"
+
+
+# ------------------------------------------------------------- logo on the QR
+LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "logo.png"
+LOGO_SHARE = 0.20          # logo width as a share of the QR width (keep it small)
+
+
+def _put_logo(img):
+    """Put the shop logo, on a white square, in the middle of a QR image (PIL)."""
+    from PIL import Image
+    img = img.convert("RGBA")
+    side = int(img.width * LOGO_SHARE)
+    logo = Image.open(LOGO_PATH).convert("RGBA")
+    logo.thumbnail((side, side), Image.LANCZOS)
+    pad = max(6, side // 10)
+    plate = Image.new("RGBA", (logo.width + 2 * pad, logo.height + 2 * pad), "white")
+    plate.alpha_composite(logo, (pad, pad))
+    img.paste(plate, ((img.width - plate.width) // 2, (img.height - plate.height) // 2))
+    return img.convert("RGB")
+
+
+def qr_data_uri_with_logo(text: str) -> str:
+    """Same kind of 'data:image/png;base64,...' string as qr_data_uri, with the logo.
+    Uses the highest error correction (H) so the bank apps can still read it."""
+    import base64
+    import io
+    import qrcode
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H,
+                       box_size=10, border=4)
+    qr.add_data(text)
+    qr.make(fit=True)
+    # Big picture (about 1200 px wide) so the logo stays sharp when the customer zooms in.
+    qr.box_size = max(10, 1200 // (qr.modules_count + 2 * qr.border))
+    img = _put_logo(qr.make_image(fill_color="black", back_color="white").get_image())
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def make_qr_image(text: str) -> str:
+    """QR with the logo when the logo file exists; if anything goes wrong, the plain
+    QR is used instead, so a logo problem can never stop a deposit."""
+    if LOGO_PATH.is_file():
+        try:
+            return qr_data_uri_with_logo(text)
+        except Exception:
+            log.exception("[Bakong] QR with logo failed - using the plain QR")
+    return qr_data_uri(text)
 
 
 # ----------------------------------------------------------------- KHQR text
@@ -235,7 +284,7 @@ class BakongClient:
         tags = parse_khqr(qr)
         if tags.get("54") != cents_to_amount(amount_cents) or not verify_khqr(qr):
             raise KhpayError("The generated KHQR failed its own check")   # never show a bad QR
-        image = await asyncio.to_thread(qr_data_uri, qr)
+        image = await asyncio.to_thread(make_qr_image, qr)
         md5 = hashlib.md5(qr.encode("utf-8")).hexdigest()
         log.info("[Bakong] QR for %s ($%s) md5 %s", note, cents_to_amount(amount_cents), md5)
         return QrPayment(transaction_id=md5, qr_image=image, qr_string=qr, payment_url="",
