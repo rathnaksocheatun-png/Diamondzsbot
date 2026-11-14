@@ -283,3 +283,12 @@ class Database:
                 raise
             else:
                 await self._conn.execute("COMMIT")
+
+    async def backup_to(self, dest: str) -> None:
+        """Write a complete, consistent copy of the database to a NEW file `dest`.
+
+        Safe while the bot is running: it waits for the lock, so no half-finished
+        change is ever copied.
+        """
+        async with self._lock:
+            await self._conn.execute("VACUUM INTO ?", (dest,))

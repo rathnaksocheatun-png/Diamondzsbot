@@ -1,8 +1,14 @@
 """Admin panel. Every handler in this file is locked to ADMIN_IDS (.env)."""
+import logging
+import os
+import shutil
+import tempfile
+from datetime import datetime, timezone
+
 from aiogram import F, Bot, Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, FSInputFile, Message
 
 from app.database import repositories as repo
 from app.database.db import Database
@@ -20,6 +26,7 @@ from app.utils.validators import (
     parse_money, to_int, valid_price, valid_product_name, valid_promo_text,
 )
 
+log = logging.getLogger(__name__)
 router = Router(name="admin")
 router.message.filter(IsAdmin())
 router.callback_query.filter(IsAdmin())
@@ -54,6 +61,29 @@ async def cmd_emoji_ids(message: Message):
         "✨ <b>Premium emoji IDs</b>\n" + "\n".join(lines)
         + "\n\nAdd this to <code>custom_emoji.json</code>:\n<code>{" + esc(snippet) + "}</code>"
     )
+
+
+# ------------------------------------------------------------ database backup
+
+
+@router.message(Command("backup"))
+async def cmd_backup(message: Message, db: Database):
+    """Send the admin a safe copy of the whole database as a file."""
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M")
+    folder = tempfile.mkdtemp()
+    dest = os.path.join(folder, f"diamond_zs_{stamp}.db")
+    try:
+        await db.backup_to(dest)
+        await message.answer_document(
+            FSInputFile(dest),
+            caption="💾 Database backup (UTC " + stamp + "). Keep this file private - "
+                    "it holds customer data and balances.",
+        )
+    except Exception:
+        log.exception("Database backup failed")
+        await message.answer("❌ Backup failed. Check the logs.")
+    finally:
+        shutil.rmtree(folder, ignore_errors=True)
 
 
 # ------------------------------------------------------------------ home

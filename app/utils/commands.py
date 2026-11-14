@@ -44,6 +44,7 @@ USER_COMMANDS = [
 # are left out - open /b2g to see them all.
 ADMIN_COMMANDS = [
     BotCommand(command="admin", description="👑 Admin panel"),
+    BotCommand(command="backup", description="💾 Backup database"),
     BotCommand(command="b2g", description="🔌 Bay2Game help + balance"),
     BotCommand(command="b2g_games", description="🎮 Supplier games"),
     BotCommand(command="b2g_ours", description="📋 Our packages"),
