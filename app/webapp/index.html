@@ -49,6 +49,26 @@ nav button.on:before{content:"";position:absolute;top:0;left:30%;right:30%;heigh
 .sheet input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#081027;color:#fff;font-size:16px;margin-top:4px;outline:0}
 .sheet input:focus{border-color:var(--b2);box-shadow:0 0 12px rgba(32,217,255,.4)}
 .sheet label{display:block;font-size:13px;color:var(--hint);margin-top:10px}.msg{margin-top:10px;font-size:14px;line-height:1.5}.err{color:#ff7b8a}.ok{color:#3be8a2}
+
+/* ---- premium layer ---- */
+@keyframes fl{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,30px)}}
+@keyframes sw{to{left:140%}}@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+body:before,body:after{content:"";position:fixed;z-index:0;border-radius:50%;filter:blur(70px);pointer-events:none;animation:fl 9s ease-in-out infinite}
+body:before{width:260px;height:260px;left:-80px;top:120px;background:rgba(18,107,255,.45)}
+body:after{width:240px;height:240px;right:-70px;bottom:140px;background:rgba(168,85,247,.38);animation-delay:-4s}
+#app{position:relative;z-index:1}
+.card{border:1px solid transparent;background:linear-gradient(150deg,#0e1c3d,#0B1630 55%,#081027) padding-box,linear-gradient(135deg,rgba(32,217,255,.7),rgba(168,85,247,.45),rgba(255,200,87,.35)) border-box}
+.btn:not(.alt){position:relative;overflow:hidden}
+.btn:not(.alt):after{content:"";position:absolute;top:0;left:-60%;width:36%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);animation:sw 3.4s ease-in-out infinite}
+.hero{position:relative;overflow:hidden;padding:18px 14px;background:linear-gradient(135deg,rgba(18,107,255,.35),rgba(168,85,247,.2)) padding-box,linear-gradient(135deg,var(--b2),var(--pu),var(--gd)) border-box}
+.hero img{width:62px;height:62px}.brand{font-size:22px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#fff,var(--b2) 60%,var(--pu));-webkit-background-clip:text;background-clip:text;color:transparent}
+.gem{position:absolute;right:64px;top:2px;opacity:.5;animation:bob 3.5s ease-in-out infinite;pointer-events:none}
+.wallet{position:relative;overflow:hidden;padding:18px 16px;background:linear-gradient(135deg,#1a2550,#0B1630 60%,#1b1840) padding-box,linear-gradient(135deg,var(--gd),rgba(255,200,87,.15) 45%,var(--b2)) border-box}
+.wallet:after{content:"";position:absolute;top:0;left:-70%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,200,87,.18),transparent);transform:skewX(-20deg);animation:sw 5s ease-in-out infinite;pointer-events:none}
+.gl{color:var(--gd);letter-spacing:1.5px;font-size:11px;font-weight:700;text-transform:uppercase}.wallet .big{font-size:34px}
+.pk{box-shadow:0 6px 24px rgba(0,0,0,.45),inset 4px 0 0 var(--b2)}.pk .pn{font-size:15px}
+h3{font-size:17px;letter-spacing:.3px;margin-top:22px}
+.tile{box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 20px rgba(18,107,255,.25)}.tile b{filter:drop-shadow(0 0 10px rgba(32,217,255,.7))}
 </style></head><body><div id="app"></div><nav><div id="nav"></div></nav>
 <script>
 (function(){
@@ -56,21 +76,21 @@ var tg=window.Telegram&&window.Telegram.WebApp;if(tg){try{tg.ready();tg.expand()
 var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wallet:["កាបូប","Wallet"],orders:["Order","Orders"],profile:["ប្រវត្តិរូប","Profile"],
  deposit:["ដាក់ប្រាក់","Deposit"],bal:["សមតុល្យ","Balance"],games:["ហ្គេមរបស់យើង","Our Games"],hot:["កញ្ចប់ពេញនិយម","Hot Packages"],
  buy:["ទិញ","Buy"],pid:["Player ID","Player ID"],sid:["Zone / Server ID","Zone / Server ID"],close:["បិទ","Close"],back:["← ត្រឡប់","← Back"],
- warn:["⚠️ សូមពិនិត្យ ID ឱ្យបានច្បាស់ណាបង។","⚠️ Please double-check the ID. A wrong ID can delay or fail delivery."],
- done:["✅ ការបញ្ជាទិញជោគជ័យជោគជ័យហើយបង! អរគុណច្រើនណាបង Order #","✅ Purchased! Order #"],doneSub:["លទ្ធផលនឹងផ្ញើក្នុង bot។","The result will be sent in the bot."],
+ warn:["⚠️ សូមពិនិត្យ ID ឱ្យបានច្បាស់។ ID ខុសអាចធ្វើឱ្យយឺត ឬបរាជ័យ។","⚠️ Please double-check the ID. A wrong ID can delay or fail delivery."],
+ done:["✅ ទិញជោគជ័យ! Order #","✅ Purchased! Order #"],doneSub:["លទ្ធផលនឹងផ្ញើក្នុង bot។","The result will be sent in the bot."],
  unsure:["មិនទាន់ដឹងលទ្ធផល។ សូមពិនិត្យ order ក្នុង bot មុនព្យាយាមម្តងទៀត។","Result unknown. Check your orders in the bot before trying again."],
  dep:["ដើម្បីដាក់ប្រាក់ សូមចុច ➕ ដាក់ប្រាក់ ក្នុង bot (ទូទាត់ KHQR)។","To deposit, tap ➕ Deposit in the bot (KHQR payment)."],
  hist:["ប្រវត្តិប្រតិបត្តិការ","Transactions"],none:["មិនទាន់មានទិន្នន័យ។","Nothing here yet."],all:["ទាំងអស់","All"],
  pending:["កំពុងរង់ចាំ","Pending"],completed:["បានបញ្ចប់","Completed"],cancelled:["បានលុប","Cancelled"],
  deposit_t:["ដាក់ប្រាក់","Top up"],purchase:["ទិញ","Purchase"],refund:["សងវិញ","Refund"],
  tord:["Order សរុប","Total orders"],tsp:["ចំណាយសរុប","Total spent"],lang:["ភាសា","Language"],support:["ជំនួយ","Support"],
- tag:["ហាងលក់ 💎 តម្លៃទាបបំផុតសម្រាប់អ្នក","Diamond Store Cheapest for u"],bn:["សូមបងបើកតាម Telegram ដើម្បីមើលផ្នែកនេះ។","Open this from Telegram to see this section."],
- ob:["បើក bot ក្នុង Telegram","Open the bot in Telegram"],empty:["មិនទាន់មានផលិតផលទេបង!។","No packages yet."],
- err:["Sad ប្រោយ មិនអាចទាញទិន្នន័យបានទេបង។","Could not load the shop."],retry:["ព្យាយាមម្តងទៀត","Try again"],
- about:["Diamond ZS · ទិញពេជ្រលឿន និងសុវត្ថិភាព","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយបង! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ បង្កើតថ្មីមកបង។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"]};
-var E={insufficient:["សមតុល្យមិនគ្រប់។ សូមដាក់ប្រាក់សិនបង!","Not enough balance. Top up in the bot, then come back."],
+ tag:["ហាងបញ្ចូលហ្គេម","Gaming Top-Up Store"],bn:["សូមបើកតាម Telegram ដើម្បីមើលផ្នែកនេះ។","Open this from Telegram to see this section."],
+ ob:["បើក bot ក្នុង Telegram","Open the bot in Telegram"],empty:["មិនទាន់មានផលិតផលទេ។","No packages yet."],
+ err:["មិនអាចទាញទិន្នន័យបានទេ។","Could not load the shop."],retry:["ព្យាយាមម្តងទៀត","Try again"],
+ about:["Diamond ZS · ទិញពេជ្រលឿន និងសុវត្ថិភាព","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយ! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ សូមបង្កើតថ្មី។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"]};
+var E={insufficient:["សមតុល្យមិនគ្រប់។ សូមដាក់ប្រាក់ក្នុង bot រួចត្រឡប់មកវិញ។","Not enough balance. Top up in the bot, then come back."],
  duplicate:["មាន order ដូចគ្នានេះកំពុងដំណើរការរួចហើយ។","The same order is already in progress."],unavailable:["កញ្ចប់នេះមិនអាចទិញបានទេ។","This package is not available."],
- invalid_player_id:["Player ID មិនត្រឹមត្រូវទេបង។","Invalid Player ID."],invalid_server_id:["Zone/Server ID មិនត្រឹមត្រូវទេបង។","Invalid Zone/Server ID."],
+ invalid_player_id:["Player ID មិនត្រឹមត្រូវ។","Invalid Player ID."],invalid_server_id:["Zone/Server ID មិនត្រឹមត្រូវ។","Invalid Zone/Server ID."],
  no_user:["សូមចុច /start ក្នុង bot មុន។","Please send /start to the bot first."],rate_limited:["ព្យាយាមញឹកញាប់ពេក សូមរង់ចាំ។","Too many tries. Please wait."],
  bad_amount:["ចំនួនទឹកប្រាក់ត្រូវនៅចន្លោះ $0.50 និង $500។","Amount must be between $0.50 and $500."],deposit_pending:["មាន QR មួយកំពុងរង់ចាំ។ សូមរង់ចាំ ៣ នាទី ឬបោះបង់ក្នុង bot។","A QR is already waiting. Wait 3 minutes or cancel it in the bot."],pay_error:["ប្រព័ន្ធទូទាត់មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Payment system problem. Try again."],no_pay:["ការដាក់ប្រាក់មិនទាន់បើកទេ។","Deposits are not available right now."],busy:["កំពុងដំណើរការ សូមរង់ចាំ។","Still working. Please wait."],error:["មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Something went wrong. Try again."]};
 var st={lang:0,games:[],bot:"",signed:false,bal:null,pay:false,banner:"",tab:"home",game:null,acct:null,filter:"all",failed:false};
@@ -122,10 +142,11 @@ function gameTile(g,open){var t=el("div","card tile");
   var sp=el("span","",g.name);sp.style.cssText="position:absolute;left:0;right:0;bottom:0;padding:20px 6px 7px;background:linear-gradient(transparent,#000d);font-weight:700;font-size:13px;text-shadow:0 0 6px #000";t.appendChild(sp)}
  else{t.appendChild(el("b","",g.emoji));t.appendChild(el("span","",g.name))}
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
-function head(){var c=el("div","card top");var im=el("img");im.src="/logo.png";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
- var g=el("div","grow");g.appendChild(el("div","nm","Diamond ZS"));g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
+function head(){var c=el("div","card top hero");var im=el("img");im.src="/logo.png";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
+ var g=el("div","grow");g.appendChild(el("div","nm brand","DIAMOND ZS"));g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
+ var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
  var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);return c}
-function balCard(){var c=el("div","card row");var g=el("div","grow");g.appendChild(el("div","sub",T("bal")));g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
+function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","sub gl",T("bal")));g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
  if(st.signed){var b=el("button","btn gold",T("deposit"));b.onclick=function(){if(st.pay)depositSheet();else notice(T("dep"))};c.appendChild(b)}return c}
 function gate(box){if(st.signed)return false;box.appendChild(el("div","note",T("bn")));
  if(st.bot){var a=el("a","btn w",T("ob"));a.href="https://t.me/"+encodeURIComponent(st.bot);a.target="_blank";a.style.cssText="display:block;text-align:center;text-decoration:none";box.appendChild(a)}return true}
@@ -155,7 +176,7 @@ function profile(box){if(gate(box))return;var a=st.acct||{};var c=el("div","card
  var s=el("div","card row");[[T("tord"),a.total_orders||0],[T("tsp"),money(a.total_spent_cents||0)]].forEach(function(p){var d=el("div","grow");d.appendChild(el("div","sub",p[0]));d.appendChild(el("div","nm",String(p[1])));s.appendChild(d)});box.appendChild(s);
  var l=el("div","card row");l.appendChild(el("div","grow",T("lang")));var b=el("button","btn s alt",T("lg"));b.onclick=function(){st.lang=1-st.lang;draw()};l.appendChild(b);box.appendChild(l);
  box.appendChild(el("div","note",T("about")))}
-var TABS=[["home","🏠"],["store","🛍"],["wallet","👛"],["orders","🧾"],["profile","👽"]];
+var TABS=[["home","🏠"],["store","🛍"],["wallet","👛"],["orders","🧾"],["profile","👤"]];
 function draw(){var app=document.getElementById("app");app.textContent="";document.documentElement.lang=st.lang?"en":"km";
  if(st.failed){app.appendChild(el("div","note",T("err")));var r=el("button","btn w",T("retry"));r.onclick=load;app.appendChild(r)}
  else{app.appendChild(head());({home:home,store:store,wallet:wallet,orders:orders,profile:profile})[st.tab](app)}
