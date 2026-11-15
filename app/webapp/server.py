@@ -62,6 +62,20 @@ async def _logo(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(path, headers={"Cache-Control": "public, max-age=86400"})
 
 
+async def _banner(request: web.Request) -> web.StreamResponse:
+    path = HERE / "banner.jpg"
+    if not path.is_file():
+        raise web.HTTPNotFound()
+    return web.FileResponse(path, headers={"Cache-Control": "public, max-age=86400"})
+
+
+async def _banner_video(request: web.Request) -> web.StreamResponse:
+    path = HERE / "banner.mp4"
+    if not path.is_file():
+        raise web.HTTPNotFound()
+    return web.FileResponse(path, headers={"Cache-Control": "public, max-age=3600"})
+
+
 async def _health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
 
@@ -378,6 +392,8 @@ async def start_webapp(db, bot_token: str, port: int, bot_username: str = "",
     app.add_routes([
         web.get("/", _page),
         web.get("/logo.png", _logo),
+        web.get("/banner.jpg", _banner),
+        web.get("/banner.mp4", _banner_video),
         web.get("/health", _health),
         web.get("/api/catalog", _catalog),
         web.post("/api/order", _order),

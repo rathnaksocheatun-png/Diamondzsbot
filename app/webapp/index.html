@@ -69,6 +69,35 @@ body:after{width:240px;height:240px;right:-70px;bottom:140px;background:rgba(168
 .pk{box-shadow:0 6px 24px rgba(0,0,0,.45),inset 4px 0 0 var(--b2)}.pk .pn{font-size:15px}
 h3{font-size:17px;letter-spacing:.3px;margin-top:22px}
 .tile{box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 20px rgba(18,107,255,.25)}.tile b{filter:drop-shadow(0 0 10px rgba(32,217,255,.7))}
+
+/* ---- bright glass theme ---- */
+:root{--hint:#dbeaff;--line:rgba(255,255,255,.4)}
+body{background:radial-gradient(70% 38% at 15% 0,rgba(255,255,255,.6),transparent 62%),radial-gradient(60% 36% at 105% 28%,rgba(120,225,255,.55),transparent 62%),linear-gradient(180deg,#5cc0ff 0,#2b7bff 38%,#0c2fa8 100%) fixed}
+body:before{background:rgba(255,255,255,.35)}body:after{background:rgba(32,217,255,.4)}
+.card,.hero,.wallet{background:linear-gradient(145deg,rgba(255,255,255,.26),rgba(255,255,255,.07)) padding-box,linear-gradient(135deg,rgba(255,255,255,.85),rgba(255,255,255,.15),rgba(32,217,255,.6)) border-box;
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 10px 32px rgba(4,20,100,.38),inset 0 1px 0 rgba(255,255,255,.55)}
+.wallet{background:linear-gradient(135deg,rgba(255,200,87,.34),rgba(255,255,255,.08)) padding-box,linear-gradient(135deg,var(--gd),rgba(255,255,255,.3),var(--b2)) border-box}
+.nm,.sub,h3{text-shadow:0 1px 6px rgba(4,20,100,.45)}.pk .pp{color:#fff;text-shadow:0 0 12px rgba(32,217,255,.9)}.pk{box-shadow:0 8px 26px rgba(4,20,100,.35),inset 4px 0 0 #fff}
+.gl{color:#fff3cf}.chip{background:rgba(255,255,255,.14)}.tag{background:rgba(255,255,255,.25);color:#fff}
+.btn.alt{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.5)}
+nav{background:rgba(10,42,150,.62);border-top:1px solid rgba(255,255,255,.35)}
+.sheet{background:linear-gradient(180deg,#2a78ff,#0c2fa8);border-color:rgba(255,255,255,.4)}
+.sheet input{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.5);color:#fff}.ov{background:rgba(3,14,70,.6)}
+.hb{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:50% 30%;border-radius:24px;border:1px solid rgba(255,255,255,.55);box-shadow:0 12px 40px rgba(4,20,100,.55),0 0 28px rgba(32,217,255,.5);margin-bottom:12px;animation:up .5s both}
+/* ---- animations on every button ---- */
+@keyframes pu{0%,100%{box-shadow:0 4px 14px rgba(32,217,255,.45)}50%{box-shadow:0 4px 28px rgba(32,217,255,1)}}
+@keyframes pg{0%,100%{box-shadow:0 4px 14px rgba(255,200,87,.45)}50%{box-shadow:0 4px 28px rgba(255,200,87,1)}}
+@keyframes pa{0%,100%{box-shadow:0 0 0 rgba(255,255,255,0)}50%{box-shadow:0 0 16px rgba(255,255,255,.55)}}
+@keyframes fy{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.btn:not(.alt):not(.gold){animation:pu 2.3s ease-in-out infinite}.btn.gold{animation:pg 2.3s ease-in-out infinite}.btn.alt{animation:pa 3s ease-in-out infinite}
+.chip{animation:pa 3.2s ease-in-out infinite}.chip.on{animation:pu 2.3s ease-in-out infinite}
+.tile{animation:up .4s both,fy 5s ease-in-out infinite}.tile:nth-child(2n){animation-delay:0s,-2.2s}.tile:nth-child(3n){animation-delay:0s,-3.6s}
+nav button.on b{animation:fy 1.8s ease-in-out infinite}button{transition:transform .12s}button:active,.tile:active{transform:scale(.92)!important}
+/* ---- falling diamonds ---- */
+#snow{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+#snow span{position:absolute;top:-30px;animation:fall linear infinite,sway ease-in-out infinite alternate;filter:drop-shadow(0 0 5px rgba(255,255,255,.8))}
+@keyframes fall{to{transform:translateY(115vh) rotate(40deg)}}@keyframes sway{from{translate:-16px 0}to{translate:16px 0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}#snow{display:none}}
 </style></head><body><div id="app"></div><nav><div id="nav"></div></nav>
 <script>
 (function(){
@@ -142,10 +171,13 @@ function gameTile(g,open){var t=el("div","card tile");
   var sp=el("span","",g.name);sp.style.cssText="position:absolute;left:0;right:0;bottom:0;padding:20px 6px 7px;background:linear-gradient(transparent,#000d);font-weight:700;font-size:13px;text-shadow:0 0 6px #000";t.appendChild(sp)}
  else{t.appendChild(el("b","",g.emoji));t.appendChild(el("span","",g.name))}
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
-function head(){var c=el("div","card top hero");var im=el("img");im.src="/logo.png";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
+function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg";bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
+  var v=document.createElement("video");v.className="hb";v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute("playsinline","");v.poster="/banner.jpg";v.preload="auto";v.style.display="none";
+  v.oncanplay=function(){v.style.display="block";bi.style.display="none";var q=v.play();if(q&&q.catch)q.catch(function(){})};v.src="/banner.mp4";w.appendChild(v)}
+ var c=el("div","card top hero");var im=el("img");im.src="/logo.png";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
  var g=el("div","grow");g.appendChild(el("div","nm brand","DIAMOND ZS"));g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
  var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
- var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);return c}
+ var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);w.appendChild(c);return w}
 function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","sub gl",T("bal")));g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
  if(st.signed){var b=el("button","btn gold",T("deposit"));b.onclick=function(){if(st.pay)depositSheet();else notice(T("dep"))};c.appendChild(b)}return c}
 function gate(box){if(st.signed)return false;box.appendChild(el("div","note",T("bn")));
@@ -189,6 +221,8 @@ function load(){st.failed=false;document.getElementById("app").textContent="…"
  fetch("/api/catalog",{headers:(tg&&tg.initData)?{"X-Init-Data":tg.initData}:{},cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   st.lang=d.lang==="en"?1:0;st.games=d.games||[];st.bot=d.bot||"";st.pay=!!d.pay;st.banner=d.banner||"";st.signed=!!d.signed_in;st.bal=d.balance_cents==null?null:d.balance_cents;draw();if(st.signed)account()})
  .catch(function(){st.failed=true;draw()})}
+(function(){var d=document.createElement("div");d.id="snow";for(var i=0;i<18;i++){var x=document.createElement("span");x.textContent="💎";
+ x.style.cssText="left:"+(Math.random()*100)+"%;font-size:"+(10+Math.random()*9)+"px;opacity:"+(.45+Math.random()*.4)+";animation-duration:"+(11+Math.random()*9)+"s,"+(3+Math.random()*3)+"s;animation-delay:-"+(Math.random()*18)+"s,0s";d.appendChild(x)}document.body.appendChild(d)})();
 load();
 })();
 </script></body></html>
