@@ -61,3 +61,11 @@ async def cmd_gameimg_off(message: Message, db: Database):
         await message.answer("✅ Picture removed.")
     else:
         await message.answer("Use: photo + caption /gameimg <code>   or   /gameimg off <code>")
+
+
+@admin.message(Command("gamecodes"))
+async def cmd_gamecodes(message: Message, db: Database):
+    """List every game with its code (the code is what /gameimg needs)."""
+    games = await repo.list_games(db, only_active=False)
+    lines = [f"{g.get('emoji') or '🎮'} {g['name']} → <code>{g['code']}</code>" for g in games]
+    await message.answer("\n".join(lines)[:4000] or "No games yet.")
