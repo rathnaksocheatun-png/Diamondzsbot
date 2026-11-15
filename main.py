@@ -191,7 +191,7 @@ async def main() -> None:
             try:
                 webapp_runner = await start_webapp(db, settings.bot_token,
                                                    int(os.getenv("PORT", "8080")),
-                                                   me.username or "")
+                                                   me.username or "", bot, settings, b2g, khpay)
                 log.info("Mini App is ON at %s", webapp_url)
                 if os.getenv("WEBAPP_MENU_BUTTON", "").strip() == "1":
                     await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(
