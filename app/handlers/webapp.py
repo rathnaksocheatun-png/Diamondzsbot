@@ -69,3 +69,40 @@ async def cmd_gamecodes(message: Message, db: Database):
     games = await repo.list_games(db, only_active=False)
     lines = [f"{g.get('emoji') or '🎮'} {g['name']} → <code>{g['code']}</code>" for g in games]
     await message.answer("\n".join(lines)[:4000] or "No games yet.")
+
+
+@admin.message(Command("pkgs"))
+async def cmd_pkgs(message: Message, db: Database):
+    """/pkgs <game_code> - list the packages of a game with their numbers."""
+    code = (message.text or "").partition(" ")[2].strip()
+    products = await repo.list_products(db, code, only_active=False) if code else []
+    if not products:
+        await message.answer("Use: /pkgs <game_code>   (see /gamecodes)")
+        return
+    await message.answer("\n".join(f"<code>{p['id']}</code> → {p['name']}" for p in products)[:4000])
+
+
+@admin.message(F.photo, F.caption.startswith("/pkgimg"))
+async def cmd_pkgimg(message: Message, db: Database):
+    """Send a photo with the caption  /pkgimg <package_number>  to set that package's picture."""
+    pid = (message.caption or "").partition(" ")[2].strip()
+    if not pid.isdigit() or not await repo.get_product(db, int(pid)):
+        await message.answer("Use: photo + caption /pkgimg <package_number>   (numbers: /pkgs <game_code>)")
+        return
+    imgs = json.loads(await repo.get_setting(db, "webapp_pimgs") or "{}")
+    imgs[pid] = message.photo[-1].file_id
+    await repo.set_setting(db, "webapp_pimgs", json.dumps(imgs))
+    await message.answer(f"✅ Picture set for package {pid}.")
+
+
+@admin.message(Command("pkgimg"))
+async def cmd_pkgimg_off(message: Message, db: Database):
+    """/pkgimg off <package_number>  removes a picture."""
+    parts = (message.text or "").split()
+    if len(parts) == 3 and parts[1] == "off":
+        imgs = json.loads(await repo.get_setting(db, "webapp_pimgs") or "{}")
+        imgs.pop(parts[2], None)
+        await repo.set_setting(db, "webapp_pimgs", json.dumps(imgs))
+        await message.answer("✅ Picture removed.")
+    else:
+        await message.answer("Use: photo + caption /pkgimg <number>   or   /pkgimg off <number>")

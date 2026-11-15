@@ -80,6 +80,11 @@ async def _games(app: web.Application) -> list:
     except ValueError:
         imgs = {}
     cache["imgs"] = imgs
+    try:
+        pimgs = json.loads(await repo.get_setting(db, "webapp_pimgs") or "{}")
+    except ValueError:
+        pimgs = {}
+    cache["pimgs"] = pimgs
     cache["banner"] = (await repo.get_setting(db, "webapp_banner")) or ""
     games = []
     for game in await repo.list_games(db, only_active=True):
@@ -94,7 +99,7 @@ async def _games(app: web.Application) -> list:
             "img": game["code"] in imgs,
             "products": [
                 {"id": p["id"], "name": p["name"], "price_cents": p["price_cents"],
-                 "emoji": p.get("emoji") or "💎"}
+                 "emoji": p.get("emoji") or "💎", "img": str(p["id"]) in pimgs}
                 for p in products
             ],
         })
@@ -163,9 +168,17 @@ MIN_DEPOSIT_CENTS, MAX_DEPOSIT_CENTS = 50, 50000     # $0.50 .. $500 (change her
 
 async def _image(request: web.Request) -> web.Response:
     """Game picture set by the admin with /gameimg (Telegram file, cached in memory)."""
-    app = request.app
-    await _games(app)
-    file_id = app["cache"].get("imgs", {}).get(request.match_info["code"])
+    await _games(request.app)
+    return await _send_file(request.app, request.app["cache"].get("imgs", {}).get(request.match_info["code"]))
+
+
+async def _pimage(request: web.Request) -> web.Response:
+    """Package picture set by the admin with /pkgimg."""
+    await _games(request.app)
+    return await _send_file(request.app, request.app["cache"].get("pimgs", {}).get(request.match_info["pid"]))
+
+
+async def _send_file(app, file_id) -> web.Response:
     if not file_id:
         raise web.HTTPNotFound()
     if file_id not in app["imgbytes"]:
@@ -372,6 +385,7 @@ async def start_webapp(db, bot_token: str, port: int, bot_username: str = "",
         web.get("/api/deposit_status", _deposit_status),
         web.post("/api/deposit_cancel", _deposit_cancel),
         web.get("/img/{code}", _image),
+        web.get("/pimg/{pid}", _pimage),
         web.get("/api/account", _account),
     ])
     runner = web.AppRunner(app, access_log=None)
