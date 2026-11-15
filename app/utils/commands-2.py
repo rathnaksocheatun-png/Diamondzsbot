@@ -30,6 +30,7 @@ log = logging.getLogger("diamond_zs")
 USER_COMMANDS = [
     BotCommand(command="start", description="🚀 Start / ចាប់ផ្តើម"),
     BotCommand(command="buy", description="💎 Buy / ទិញពេជ្រ"),
+    BotCommand(command="app", description="🛍 Shop app / ហាង app"),
     BotCommand(command="orders", description="📦 Orders / ការបញ្ជាទិញ"),
     BotCommand(command="wallet", description="👛 Wallet / កាបូប"),
     BotCommand(command="deposit", description="➕ Deposit / ដាក់ប្រាក់"),

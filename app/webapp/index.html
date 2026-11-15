@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diamond ZS</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: var(--tg-theme-bg-color, #0b1020);
+    --text: var(--tg-theme-text-color, #ffffff);
+    --hint: var(--tg-theme-hint-color, #8d96b0);
+    --card: var(--tg-theme-secondary-bg-color, #151b33);
+    --accent: var(--tg-theme-button-color, #2f7bff);
+    --accent-text: var(--tg-theme-button-text-color, #ffffff);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans Khmer", sans-serif; }
+  body { padding: 0 14px 28px; padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px); max-width: 640px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 0 10px; }
+  header img { width: 46px; height: 46px; border-radius: 12px; object-fit: contain; background: #fff2; }
+  header h1 { font-size: 18px; margin: 0; flex: 1; }
+  .lang { border: 1px solid var(--hint); background: none; color: var(--text); border-radius: 999px;
+    padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 6px 0 12px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex: 0 0 auto; border: 1px solid transparent; background: var(--card); color: var(--text);
+    border-radius: 999px; padding: 9px 14px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  .chip.on { background: var(--accent); color: var(--accent-text); }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .card { background: var(--card); border-radius: 14px; padding: 14px 12px; display: flex;
+    flex-direction: column; gap: 6px; min-height: 92px; justify-content: space-between; }
+  .card .name { font-size: 14px; line-height: 1.35; word-break: break-word; }
+  .card .price { font-size: 17px; font-weight: 700; color: var(--accent); }
+  .note, .state { color: var(--hint); font-size: 13px; text-align: center; padding: 18px 8px; line-height: 1.6; }
+  .btn { display: block; width: 100%; margin-top: 14px; border: 0; border-radius: 12px; padding: 13px;
+    background: var(--accent); color: var(--accent-text); font-size: 15px; cursor: pointer; }
+  a.btn { text-align: center; text-decoration: none; }
+  .skeleton { height: 92px; border-radius: 14px; background: var(--card); opacity: .55; }
+</style>
+</head>
+<body>
+<header>
+  <img src="/logo.png" alt="" onerror="this.style.display='none'">
+  <h1 id="title">Diamond ZS</h1>
+  <button class="lang" id="lang"></button>
+</header>
+<div class="chips" id="chips"></div>
+<div id="content"></div>
+
+<script>
+(function () {
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
+
+  var I18N = {
+    km: { title: "ហាង Diamond ZS", empty: "មិនទាន់មានផលិតផលនៅឡើយទេ។",
+          error: "មិនអាចទាញទិន្នន័យបានទេ។ សូមព្យាយាមម្តងទៀត។", retry: "ព្យាយាមម្តងទៀត",
+          note: "ដើម្បីទិញ សូមត្រឡប់ទៅ bot ហើយចុច 💎 ទិញពេជ្រ។", back: "ត្រឡប់ទៅ bot", lang: "English",
+          browserNote: "ដើម្បីទិញ សូមបើក bot ក្នុង Telegram។", openBot: "បើក bot ក្នុង Telegram" },
+    en: { title: "Diamond ZS Shop", empty: "No packages yet.",
+          error: "Could not load the shop. Please try again.", retry: "Try again",
+          note: "To buy, go back to the bot and tap 💎 Buy diamonds.", back: "Back to the bot", lang: "ខ្មែរ",
+          browserNote: "To buy, open the bot in Telegram.", openBot: "Open the bot in Telegram" }
+  };
+  var state = { lang: "km", games: [], active: null, bot: "", signedIn: false };
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function T(key) { return I18N[state.lang][key]; }
+  function money(cents) { return "$" + (cents / 100).toFixed(2); }
+  function content() { return document.getElementById("content"); }
+
+  function showState(message, withRetry) {
+    var box = content(); box.textContent = "";
+    box.appendChild(el("div", "state", message));
+    if (withRetry) {
+      var b = el("button", "btn", T("retry")); b.onclick = load; box.appendChild(b);
+    }
+    document.getElementById("chips").textContent = "";
+  }
+
+  function render() {
+    document.documentElement.lang = state.lang;
+    document.getElementById("title").textContent = T("title");
+    document.getElementById("lang").textContent = T("lang");
+    var chips = document.getElementById("chips"); chips.textContent = "";
+    var box = content(); box.textContent = "";
+    if (!state.games.length) { box.appendChild(el("div", "state", T("empty"))); return; }
+    state.games.forEach(function (g) {
+      var chip = el("button", "chip" + (g.code === state.active ? " on" : ""), g.emoji + " " + g.name);
+      chip.onclick = function () { state.active = g.code; render(); };
+      chips.appendChild(chip);
+    });
+    var game = state.games.filter(function (g) { return g.code === state.active; })[0] || state.games[0];
+    var grid = el("div", "grid");
+    game.products.forEach(function (p) {
+      var card = el("div", "card");
+      card.appendChild(el("div", "name", p.emoji + " " + p.name));
+      card.appendChild(el("div", "price", money(p.price_cents)));
+      grid.appendChild(card);
+    });
+    box.appendChild(grid);
+    if (state.signedIn && tg) {
+      box.appendChild(el("div", "note", T("note")));
+      var back = el("button", "btn", T("back")); back.onclick = function () { tg.close(); }; box.appendChild(back);
+    } else {
+      box.appendChild(el("div", "note", T("browserNote")));
+      if (state.bot) {
+        var open = el("a", "btn", T("openBot"));
+        open.href = "https://t.me/" + encodeURIComponent(state.bot);
+        open.target = "_blank"; open.rel = "noopener";
+        box.appendChild(open);
+      }
+    }
+  }
+
+  function load() {
+    var box = content(); box.textContent = "";
+    var grid = el("div", "grid");
+    for (var i = 0; i < 6; i++) grid.appendChild(el("div", "skeleton"));
+    box.appendChild(grid);
+    var headers = (tg && tg.initData) ? { "X-Init-Data": tg.initData } : {};
+    fetch("/api/catalog", { headers: headers, cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+      .then(function (data) {
+        state.lang = I18N[data.lang] ? data.lang : "km";
+        state.games = data.games || [];
+        state.bot = data.bot || "";
+        state.signedIn = !!data.signed_in;
+        if (!state.games.some(function (g) { return g.code === state.active; })) {
+          state.active = state.games.length ? state.games[0].code : null;
+        }
+        render();
+      })
+      .catch(function () { showState(T("error"), true); });
+  }
+
+  document.getElementById("lang").onclick = function () {
+    state.lang = state.lang === "km" ? "en" : "km"; render();
+  };
+  document.getElementById("lang").textContent = T("lang");
+  load();
+})();
+</script>
+</body>
+</html>

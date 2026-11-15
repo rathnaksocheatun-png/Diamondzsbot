@@ -10,7 +10,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramUnauthorizedError
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import ErrorEvent
+from aiogram.types import ErrorEvent, MenuButtonWebApp, WebAppInfo
 
 from app.config import ConfigError, load_settings
 from app.database import repositories as repo
@@ -23,6 +23,7 @@ from app.handlers import wallet_admin
 from app.handlers import broadcast
 from app.handlers import howto_video
 from app.handlers import bakong_admin
+from app.handlers import webapp as webapp_handler
 from app.handlers import payway_admin
 from app.services.bay2game import Bay2GameClient, Bay2GameError
 from app.services.catalog import watch_catalog
@@ -37,6 +38,7 @@ from app.utils.emoji_store import EmojiStore, LiveEmojiMiddleware
 from app.services.online_payments import watch_payments
 from app.utils.telegram import notify_admins
 from app.utils.middleware import UserMiddleware
+from app.webapp.server import start_webapp
 
 log = logging.getLogger("diamond_zs")
 
@@ -148,6 +150,9 @@ async def main() -> None:
         if settings.bay2game_api_key else None
     )
     dp["b2g"] = b2g
+    # Shop Mini App: ON only when WEBAPP_URL (the public https address) is set in Railway.
+    webapp_url = os.getenv("WEBAPP_URL", "").strip().rstrip("/")
+    dp["webapp_url"] = webapp_url
 
     dp.message.outer_middleware(UserMiddleware())
     dp.callback_query.outer_middleware(UserMiddleware())
@@ -155,6 +160,7 @@ async def main() -> None:
 
     # ORDER MATTERS: earlier routers get the first chance to handle a message.
     dp.include_router(start.router)     # /start, /menu, /cancel, language
+    dp.include_router(webapp_handler.router)  # /app (opens the shop Mini App)
     dp.include_router(live_edit.router)  # admin only: /emoji, /texts, /settext (works in any state)
     dp.include_router(wallet_admin.router)  # admin only: /addbalance, /subbalance
     dp.include_router(broadcast.router)  # admin only: /broadcast (text / photo / video to all customers)
@@ -174,11 +180,24 @@ async def main() -> None:
     sweeper = None
     pricer = None
     importer = None
+    webapp_runner = None
     try:
         me = await bot.get_me()
         log.info("Bot started as @%s - press Ctrl+C to stop", me.username)
         await bot.delete_webhook(drop_pending_updates=True)
         await setup_commands(bot, settings)  # Telegram "Menu" list (customers + admins)
+        if webapp_url:
+            # A problem with the Mini App must never stop the bot itself.
+            try:
+                webapp_runner = await start_webapp(db, settings.bot_token,
+                                                   int(os.getenv("PORT", "8080")),
+                                                   me.username or "")
+                log.info("Mini App is ON at %s", webapp_url)
+                if os.getenv("WEBAPP_MENU_BUTTON", "").strip() == "1":
+                    await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(
+                        text="🛍 Shop", web_app=WebAppInfo(url=webapp_url)))
+            except Exception:
+                log.exception("Mini App could not start - the bot continues without it")
         if khpay is not None:
             await _check_payway(bot, settings, khpay)
             watcher = asyncio.create_task(watch_payments(bot, db, khpay, settings))
@@ -201,6 +220,8 @@ async def main() -> None:
         for task in (watcher, sweeper, pricer, importer):
             if task is not None:
                 task.cancel()
+        if webapp_runner is not None:
+            await webapp_runner.cleanup()
         await db.close()
         await bot.session.close()
 
