@@ -106,3 +106,27 @@ async def cmd_pkgimg_off(message: Message, db: Database):
         await message.answer("✅ Picture removed.")
     else:
         await message.answer("Use: photo + caption /pkgimg <number>   or   /pkgimg off <number>")
+
+
+@admin.message(Command("hot"))
+async def cmd_hot(message: Message, db: Database):
+    """/hot  |  /hot add 15 26  |  /hot remove 15  |  /hot clear   (Hot Packages on the Mini App home)"""
+    parts = (message.text or "").split()[1:]
+    ids = json.loads(await repo.get_setting(db, "webapp_hot") or "[]")
+    if parts and parts[0] == "clear":
+        ids = []
+    elif len(parts) > 1 and parts[0] in ("add", "remove"):
+        nums = [int(x) for x in parts[1:] if x.isdigit()]
+        if parts[0] == "add":
+            for n in nums:
+                if n not in ids and await repo.get_product(db, n):
+                    ids.append(n)
+        else:
+            ids = [i for i in ids if i not in nums]
+    await repo.set_setting(db, "webapp_hot", json.dumps(ids[:8]))
+    lines = []
+    for i in ids[:8]:
+        p = await repo.get_product(db, i)
+        lines.append(f"<code>{i}</code> → {p.get('name', '?') if p else '?'}")
+    await message.answer("🔥 Hot packages (max 8):\n" + ("\n".join(lines) or "none (automatic)")
+                         + "\n\n/hot add 15 26   |   /hot remove 15   |   /hot clear\nNumbers: /pkgs <game_code>")

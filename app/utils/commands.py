@@ -46,6 +46,12 @@ USER_COMMANDS = [
 ADMIN_COMMANDS = [
     BotCommand(command="admin", description="👑 Admin panel"),
     BotCommand(command="backup", description="💾 Backup database"),
+    BotCommand(command="gamecodes", description="🎮 Game codes (for pictures)"),
+    BotCommand(command="gameimg", description="🖼 Game picture (photo + caption)"),
+    BotCommand(command="pkgs", description="📦 Package numbers of a game"),
+    BotCommand(command="pkgimg", description="🖼 Package picture (photo + caption)"),
+    BotCommand(command="hot", description="🔥 Hot packages on the app"),
+    BotCommand(command="banner", description="📢 App banner text"),
     BotCommand(command="b2g", description="🔌 Bay2Game help + balance"),
     BotCommand(command="b2g_games", description="🎮 Supplier games"),
     BotCommand(command="b2g_ours", description="📋 Our packages"),

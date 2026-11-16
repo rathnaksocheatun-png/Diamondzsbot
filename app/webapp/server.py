@@ -100,6 +100,10 @@ async def _games(app: web.Application) -> list:
         pimgs = {}
     cache["pimgs"] = pimgs
     cache["banner"] = (await repo.get_setting(db, "webapp_banner")) or ""
+    try:
+        cache["hot"] = json.loads(await repo.get_setting(db, "webapp_hot") or "[]")
+    except ValueError:
+        cache["hot"] = []
     games = []
     for game in await repo.list_games(db, only_active=True):
         products = await repo.list_products(db, game["code"], only_active=True)
@@ -145,6 +149,7 @@ async def _catalog(request: web.Request) -> web.Response:
     return _json({"lang": lang, "games": await _games(request.app),
                   "bot": request.app["bot_username"], "signed_in": user is not None,
                   "balance_cents": balance, "banner": request.app["cache"].get("banner", ""),
+                  "hot": request.app["cache"].get("hot", []),
                   "pay": request.app["pay"] is not None})
 
 
