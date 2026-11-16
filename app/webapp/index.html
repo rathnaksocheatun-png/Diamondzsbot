@@ -171,14 +171,14 @@ function gameTile(g,open){var t=el("div","card tile");
   var sp=el("span","",g.name);sp.style.cssText="position:absolute;left:0;right:0;bottom:0;padding:20px 6px 7px;background:linear-gradient(transparent,#000d);font-weight:700;font-size:13px;text-shadow:0 0 6px #000";t.appendChild(sp)}
  else{t.appendChild(el("b","",g.emoji));t.appendChild(el("span","",g.name))}
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
-function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg";bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
-  var v=document.createElement("video");v.className="hb";v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute("playsinline","");v.poster="/banner.jpg";v.preload="auto";v.style.display="none";
-  v.oncanplay=function(){v.style.display="block";bi.style.display="none";var q=v.play();if(q&&q.catch)q.catch(function(){})};v.src="/banner.mp4";w.appendChild(v)}
+function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg?v=2";bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
+  var v=document.createElement("video");v.className="hb";v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute("playsinline","");v.poster="/banner.jpg?v=2";v.preload="auto";v.style.display="none";
+  v.oncanplay=function(){v.style.display="block";bi.style.display="none";var q=v.play();if(q&&q.catch)q.catch(function(){})};v.src="/banner.mp4?v=2";w.appendChild(v)}
  var c=el("div","card top hero");var im=el("img");im.src="/logo.png";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
  var g=el("div","grow");g.appendChild(el("div","nm brand","DIAMOND ZS"));g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
  var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
  var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);w.appendChild(c);return w}
-function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","sub gl",T("bal")));g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
+function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","sub gl",T("bal")));g.appendChild(el("div","big",st.bal===null?"--":money(st.bal)));c.appendChild(g);
  if(st.signed){var b=el("button","btn gold",T("deposit"));b.onclick=function(){if(st.pay)depositSheet();else notice(T("dep"))};c.appendChild(b)}return c}
 function gate(box){if(st.signed)return false;box.appendChild(el("div","note",T("bn")));
  if(st.bot){var a=el("a","btn w",T("ob"));a.href="https://t.me/"+encodeURIComponent(st.bot);a.target="_blank";a.style.cssText="display:block;text-align:center;text-decoration:none";box.appendChild(a)}return true}
