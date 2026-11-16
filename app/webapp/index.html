@@ -98,6 +98,29 @@ nav button.on b{animation:fy 1.8s ease-in-out infinite}button{transition:transfo
 #snow span{position:absolute;top:-30px;animation:fall linear infinite,sway ease-in-out infinite alternate;filter:drop-shadow(0 0 5px rgba(255,255,255,.8))}
 @keyframes fall{to{transform:translateY(115vh) rotate(40deg)}}@keyframes sway{from{translate:-16px 0}to{translate:16px 0}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}#snow{display:none}}
+
+/* ---- sky + 3D glass (like the reference) ---- */
+@keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(70px)}}
+body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transparent 65%),radial-gradient(50% 26% at 90% 40%,rgba(255,255,255,.35),transparent 65%),radial-gradient(70% 30% at 30% 100%,rgba(255,255,255,.4),transparent 70%),linear-gradient(180deg,#8fdcff 0,#46a3ff 30%,#2262ee 65%,#1237b8 100%) fixed}
+body:before{width:340px;height:150px;left:-90px;top:110px;background:rgba(255,255,255,.55);filter:blur(34px);animation:drift 22s ease-in-out infinite}
+body:after{width:300px;height:130px;right:-100px;top:46%;bottom:auto;background:rgba(255,255,255,.45);filter:blur(34px);animation:drift 28s ease-in-out infinite reverse}
+.card,.hero,.wallet{position:relative;border-radius:24px;backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);
+ background:linear-gradient(160deg,rgba(255,255,255,.36),rgba(255,255,255,.1) 45%,rgba(255,255,255,.18)) padding-box,linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,255,255,.2) 40%,rgba(120,220,255,.85)) border-box;
+ box-shadow:0 14px 34px rgba(8,34,140,.38),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -8px 16px rgba(20,70,200,.28)}
+.wallet{background:linear-gradient(160deg,rgba(255,214,120,.5),rgba(255,255,255,.1) 55%,rgba(255,200,87,.25)) padding-box,linear-gradient(135deg,#fff3c4,rgba(255,200,87,.5) 45%,rgba(120,220,255,.8)) border-box}
+.card:before{content:"";position:absolute;left:6px;right:6px;top:3px;height:42%;border-radius:22px 22px 60px 60px;background:linear-gradient(rgba(255,255,255,.42),transparent);pointer-events:none}
+.card>*:not(.gem){position:relative}
+@keyframes pu{0%,100%{box-shadow:0 5px 0 #0a3fb0,0 9px 16px rgba(32,217,255,.45),inset 0 2px 0 rgba(255,255,255,.75)}50%{box-shadow:0 5px 0 #0a3fb0,0 9px 30px rgba(32,217,255,1),inset 0 2px 0 rgba(255,255,255,.75)}}
+@keyframes pg{0%,100%{box-shadow:0 5px 0 #a8730a,0 9px 16px rgba(255,200,87,.45),inset 0 2px 0 rgba(255,255,255,.85)}50%{box-shadow:0 5px 0 #a8730a,0 9px 30px rgba(255,200,87,1),inset 0 2px 0 rgba(255,255,255,.85)}}
+@keyframes pa{0%,100%{box-shadow:0 4px 0 rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.7)}50%{box-shadow:0 4px 0 rgba(255,255,255,.2),0 0 18px rgba(255,255,255,.6),inset 0 1px 0 rgba(255,255,255,.7)}}
+.btn:not(.alt):not(.gold){background:linear-gradient(180deg,#7be8ff,#2a95ff 50%,#126BFF)}
+.btn.gold{background:linear-gradient(180deg,#fff1c2,#ffc857 55%,#f3a81d);color:#3a2600}
+.btn.alt{background:rgba(255,255,255,.2)}
+.btn{border-radius:15px;text-shadow:0 1px 2px rgba(0,40,140,.45)}.btn.gold{text-shadow:none}
+nav{left:10px;right:10px;margin:0 auto;max-width:620px;bottom:calc(8px + env(safe-area-inset-bottom,0px));padding-bottom:0;border-radius:28px;overflow:hidden;
+ background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.1));border:1px solid rgba(255,255,255,.65);backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);
+ box-shadow:0 12px 30px rgba(8,34,140,.45),inset 0 2px 0 rgba(255,255,255,.6)}
+nav button{color:#e6f2ff}#app{padding-bottom:116px}
 </style></head><body><div id="app"></div><nav><div id="nav"></div></nav>
 <script>
 (function(){
