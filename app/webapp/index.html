@@ -157,11 +157,50 @@ nav button{font-weight:700}nav button:not(.on){opacity:.95}
 @keyframes rbf{to{stroke-dashoffset:-620}}
 #gembig{left:auto;right:-8px;margin:0;bottom:82px;width:min(64vw,260px);filter:drop-shadow(0 0 22px rgba(80,190,255,1)) drop-shadow(0 0 50px rgba(168,85,247,.85))}
 nav button.on{background:radial-gradient(circle at 50% 45%,rgba(255,200,87,.38),transparent 72%)}
-</style></head><body><div id="flow"></div><div class="wv w1"></div><div class="wv w2"></div><div class="wv w3"></div>
-<div id="shade"></div>
-<svg id="ribbons" viewBox="0 0 400 240" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="rg1" x1="0" x2="1"><stop offset="0" stop-color="#A855F7" stop-opacity="0"/><stop offset=".45" stop-color="#A855F7"/><stop offset="1" stop-color="#20D9FF"/></linearGradient><linearGradient id="rg2" x1="0" x2="1"><stop offset="0" stop-color="#20D9FF" stop-opacity="0"/><stop offset=".5" stop-color="#7fd0ff"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
-<g fill="none" stroke-linecap="round"><path class="rb" stroke="url(#rg1)" stroke-width="5" d="M-10 150C70 90 140 190 230 150S350 70 410 110"/><path class="rb r2" stroke="url(#rg2)" stroke-width="3" d="M-10 175C80 130 150 215 240 172S360 110 410 140"/><path class="rb r3" stroke="url(#rg1)" stroke-width="2" d="M-10 120C90 60 170 160 250 115S350 40 410 80"/><path class="rb r4" stroke="url(#rg2)" stroke-width="1.5" d="M-10 200C100 160 170 235 260 190S360 150 410 170"/></g></svg>
-<div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity=".9" stroke-width="1.6" stroke-linejoin="round" fill-opacity=".8"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
+
+#shade{height:430px;background:linear-gradient(transparent,rgba(40,16,140,.6) 45%,rgba(10,6,64,.96))}
+#ribbons{height:280px;bottom:50px}
+
+/* ---- clear status labels ---- */
+.tag{padding:5px 14px;font-weight:800;font-size:13px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.7);background:linear-gradient(180deg,#b98bff,#7a3fe0);box-shadow:0 2px 8px rgba(40,10,120,.4)}
+.tag.completed{background:linear-gradient(180deg,#3deba5,#0a9a60);color:#fff}
+.tag.cancelled{background:linear-gradient(180deg,#ff8c9c,#d62e4d);color:#fff}
+.chip{background:rgba(10,40,150,.45);border-color:rgba(255,255,255,.65)}.chip.on{background:linear-gradient(100deg,#126BFF,#A855F7)}
+
+/* ---- smooth buttons (only transform/opacity are animated) ---- */
+@keyframes halo{0%,100%{opacity:.25;transform:scale(.97)}50%{opacity:.95;transform:scale(1.07)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes sheen{from{background-position:210% 0,0 0}to{background-position:-110% 0,0 0}}
+@keyframes flowY{0%,100%{transform:translateY(-10%)}50%{transform:translateY(10%)}}
+.btn{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.btn:not(.alt){position:relative;isolation:isolate;overflow:visible;will-change:transform}
+.btn:not(.alt):not(.gold){--gc:rgba(32,217,255,.95);background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.6) 50%,transparent 62%) 210% 0/250% 100% no-repeat,linear-gradient(180deg,#7be8ff,#2a95ff 50%,#126BFF);
+ box-shadow:0 5px 0 #0a3fb0,inset 0 2px 0 rgba(255,255,255,.75);animation:breathe 2.6s ease-in-out infinite,sheen 3.4s ease-in-out infinite}
+.btn.gold{--gc:rgba(255,200,87,.95);background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.75) 50%,transparent 62%) 210% 0/250% 100% no-repeat,linear-gradient(180deg,#fff1c2,#ffc857 55%,#f3a81d);
+ box-shadow:0 5px 0 #a8730a,inset 0 2px 0 rgba(255,255,255,.85);animation:breathe 2.8s ease-in-out infinite,sheen 3.8s ease-in-out infinite}
+.btn:not(.alt):before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;box-shadow:0 0 22px 5px var(--gc);animation:halo 2.2s ease-in-out infinite;will-change:transform,opacity}
+.btn:not(.alt):after{content:none}
+.btn.alt,.chip,.chip.on{animation:none}.btn.alt{box-shadow:0 4px 0 rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.7)}
+.chip.on{box-shadow:0 0 14px rgba(168,85,247,.6)}
+#flow{inset:-25% 0;background-size:100% 100%;animation:flowY 9s ease-in-out infinite;will-change:transform}
+.wv,#gembig{will-change:transform}
+.card{animation:up .55s cubic-bezier(.2,.8,.2,1) both}#app>.card:nth-child(2){animation-delay:0.06s}#app>.card:nth-child(3){animation-delay:0.12s}#app>.card:nth-child(4){animation-delay:0.18s}#app>.card:nth-child(5){animation-delay:0.24s}#app>.card:nth-child(6){animation-delay:0.30s}#app>.card:nth-child(7){animation-delay:0.36s}#app>.card:nth-child(8){animation-delay:0.42s}#app>.card:nth-child(9){animation-delay:0.48s}
+
+/* ---- on-screen number pad (pink) ---- */
+.sheet input[readonly]{font-size:22px;font-weight:800;letter-spacing:2px;min-height:52px;caret-color:transparent}
+.sheet input.act{border-color:#ff8fd0;box-shadow:0 0 16px rgba(255,105,180,.8)}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.key{border:1px solid rgba(255,255,255,.85);border-radius:16px;min-height:52px;font-size:24px;font-weight:800;color:#fff;cursor:pointer;
+ background:linear-gradient(180deg,#ffd0ec,#ff6fbe 55%,#ea3fa3);text-shadow:0 1px 3px rgba(150,0,90,.7);
+ box-shadow:0 5px 0 #b3217a,0 8px 18px rgba(255,105,180,.55),inset 0 2px 0 rgba(255,255,255,.85);transition:transform .12s,box-shadow .12s}
+.key.fn{background:linear-gradient(180deg,#ffc0f0,#c957ff 55%,#9d34e0);box-shadow:0 5px 0 #6c1fa8,0 8px 18px rgba(201,87,255,.55),inset 0 2px 0 rgba(255,255,255,.85);font-size:21px}
+.key:active{transform:translateY(4px) scale(.97)!important;box-shadow:0 1px 0 #b3217a,inset 0 2px 0 rgba(255,255,255,.6)}
+
+/* ---- calmer background + new logo ---- */
+body:before,body:after{animation:none}
+.top img.lg,.hero img.lg{width:112px;height:auto;max-height:84px;border:0;border-radius:0;background:none;box-shadow:none;object-fit:contain;filter:drop-shadow(0 0 12px rgba(32,217,255,.85))}
+</style></head><body><div id="shade"></div>
+<div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity="1" stroke-width="2" stroke-linejoin="round" fill-opacity=".48"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
 <g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
 <div id="app"></div><nav><div id="nav"></div></nav>
 <script>
@@ -181,7 +220,7 @@ var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wall
  tag:["ហាងបញ្ចូលហ្គេម","Gaming Top-Up Store"],bn:["សូមបើកតាម Telegram ដើម្បីមើលផ្នែកនេះ។","Open this from Telegram to see this section."],
  ob:["បើក bot ក្នុង Telegram","Open the bot in Telegram"],empty:["មិនទាន់មានផលិតផលទេ។","No packages yet."],
  err:["មិនអាចទាញទិន្នន័យបានទេ។","Could not load the shop."],retry:["ព្យាយាមម្តងទៀត","Try again"],
- about:["Diamond ZS · ទិញពេជ្រលឿន និងសុវត្ថិភាព","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយ! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ សូមបង្កើតថ្មី។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"]};
+ about:["Diamond ZS · ទិញពេជ្រលឿន និងសុវត្ថិភាព","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយ! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ សូមបង្កើតថ្មី។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"],abc:["ID មានអក្សរ? ប្តូរទៅ ABC","ID has letters? Switch to ABC"],num:["ប្តូរត្រឡប់ទៅលេខ (123)","Back to numbers (123)"]};
 var E={insufficient:["សមតុល្យមិនគ្រប់។ សូមដាក់ប្រាក់ក្នុង bot រួចត្រឡប់មកវិញ។","Not enough balance. Top up in the bot, then come back."],
  duplicate:["មាន order ដូចគ្នានេះកំពុងដំណើរការរួចហើយ។","The same order is already in progress."],unavailable:["កញ្ចប់នេះមិនអាចទិញបានទេ។","This package is not available."],
  invalid_player_id:["Player ID មិនត្រឹមត្រូវ។","Invalid Player ID."],invalid_server_id:["Zone/Server ID មិនត្រឹមត្រូវ។","Invalid Zone/Server ID."],
@@ -197,9 +236,14 @@ function shut(){stopT();if(sheet){sheet.remove();sheet=null}}
 function api(path,body){return fetch(path,{method:"POST",cache:"no-store",headers:{"X-Init-Data":tg.initData,"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json()})}
 function mk(){shut();sheet=el("div","ov");var b=el("div","sheet");sheet.appendChild(b);sheet.onclick=function(e){if(e.target===sheet)shut()};document.body.appendChild(sheet);return b}
 function notice(text){var b=mk();b.appendChild(el("div","msg",text));var c=el("button","btn w",T("close"));c.onclick=function(){shut();if(tg&&st.signed)tg.close()};b.appendChild(c)}
+function pad(inputs){var act=inputs[0];function setAct(i){act=i;inputs.forEach(function(x){x.classList.toggle("act",x===i)})}
+ inputs.forEach(function(i){i.readOnly=true;i.inputMode="none";i.onclick=function(){setAct(i)}});setAct(inputs[0]);
+ var g=el("div","kp");["1","2","3","4","5","6","7","8","9","C","0","⌫"].forEach(function(k){var b=el("button","key"+(k==="C"||k==="⌫"?" fn":""),k);b.type="button";
+  b.onclick=function(){var v=act.value;if(k==="⌫")v=v.slice(0,-1);else if(k==="C")v="";else if(v.length<20)v+=k;act.value=v};g.appendChild(b)});return g}
 function buy(p,g){var b=mk();b.appendChild(el("h3","",p.emoji+" "+p.name));b.appendChild(el("div","sub",g.name+" · "+money(p.price_cents)+" · "+T("bal")+" "+money(st.bal)));
- b.appendChild(el("label","",T("pid")));var pid=el("input");pid.maxLength=40;pid.autocomplete="off";b.appendChild(pid);
- var sid=el("input");sid.maxLength=40;sid.autocomplete="off";if(g.needs_server){b.appendChild(el("label","",T("sid")));b.appendChild(sid)}
+ b.appendChild(el("label","",T("pid")));var pid=el("input");b.appendChild(pid);
+ var sid=el("input");if(g.needs_server){b.appendChild(el("label","",T("sid")));b.appendChild(sid)}
+ b.appendChild(pad(g.needs_server?[pid,sid]:[pid]));
  b.appendChild(el("div","msg",T("warn")));var m=el("div","msg");b.appendChild(m);
  var go=el("button","btn w",T("buy")+" "+money(p.price_cents));b.appendChild(go);var no=el("button","btn alt w",T("close"));no.onclick=shut;b.appendChild(no);
  function say(x,c){m.textContent=x;m.className="msg "+(c||"")}
@@ -239,11 +283,11 @@ function gameTile(g,open){var t=el("div","card tile");
 function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg?v=2";bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
   var v=document.createElement("video");v.className="hb";v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute("playsinline","");v.poster="/banner.jpg?v=2";v.preload="auto";v.style.display="none";
   v.oncanplay=function(){v.style.display="block";bi.style.display="none";var q=v.play();if(q&&q.catch)q.catch(function(){})};v.src="/banner.mp4?v=2";w.appendChild(v)}
- var c=el("div","card top hero");var im=el("img");im.src="/logo.png";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
- var g=el("div","grow");g.appendChild(el("div","nm brand","DIAMOND ZS"));g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
+ var c=el("div","card top hero");var im=el("img","lg");im.src="/logo.png?v=2";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
+ var g=el("div","grow");g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
  var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
  var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);w.appendChild(c);return w}
-function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","sub gl",T("bal")));g.appendChild(el("div","big",st.bal===null?"--":money(st.bal)));c.appendChild(g);
+function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","sub gl",T("bal")));g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
  if(st.signed){var b=el("button","btn gold",T("deposit"));b.onclick=function(){if(st.pay)depositSheet();else notice(T("dep"))};c.appendChild(b)}return c}
 function gate(box){if(st.signed)return false;box.appendChild(el("div","note",T("bn")));
  if(st.bot){var a=el("a","btn w",T("ob"));a.href="https://t.me/"+encodeURIComponent(st.bot);a.target="_blank";a.style.cssText="display:block;text-align:center;text-decoration:none";box.appendChild(a)}return true}
@@ -288,6 +332,7 @@ function load(){st.failed=false;document.getElementById("app").textContent="…"
  .catch(function(){st.failed=true;draw()})}
 (function(){var d=document.createElement("div");d.id="snow";for(var i=0;i<18;i++){var x=document.createElement("span");x.textContent="💎";
  x.style.cssText="left:"+(Math.random()*100)+"%;font-size:"+(10+Math.random()*9)+"px;opacity:"+(.45+Math.random()*.4)+";animation-duration:"+(11+Math.random()*9)+"s,"+(3+Math.random()*3)+"s;animation-delay:-"+(Math.random()*18)+"s,0s";d.appendChild(x)}document.body.appendChild(d)})();
+document.addEventListener("pointerdown",function(e){var b=e.target.closest&&e.target.closest("button,.tile,.card.buy");if(b){try{tg.HapticFeedback.impactOccurred("light")}catch(x){}}},{passive:true});
 load();
 })();
 </script></body></html>
