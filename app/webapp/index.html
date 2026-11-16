@@ -121,7 +121,49 @@ nav{left:10px;right:10px;margin:0 auto;max-width:620px;bottom:calc(8px + env(saf
  background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.1));border:1px solid rgba(255,255,255,.65);backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);
  box-shadow:0 12px 30px rgba(8,34,140,.45),inset 0 2px 0 rgba(255,255,255,.6)}
 nav button{color:#e6f2ff}#app{padding-bottom:116px}
-</style></head><body><div id="app"></div><nav><div id="nav"></div></nav>
+
+/* ---- readable text ---- */
+:root{--hint:#fff}
+.nm,.sub,.pn,.note,h3,.msg,.sheet label,nav button{color:#fff;text-shadow:0 1px 2px rgba(2,18,95,.85),0 0 10px rgba(2,18,95,.55)}
+.nm{font-weight:800}.sub{font-weight:600;opacity:1}.pk .pn{font-weight:800;font-size:15px}.note{font-weight:600}
+.card,.hero,.wallet{background:linear-gradient(160deg,rgba(255,255,255,.3),rgba(255,255,255,.05) 45%,rgba(255,255,255,.12)) padding-box,linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,255,255,.2) 40%,rgba(120,220,255,.85)) border-box;background-color:rgba(8,38,150,.34)}
+.wallet{background:linear-gradient(160deg,rgba(255,214,120,.38),rgba(255,255,255,.05) 55%,rgba(255,200,87,.2)) padding-box,linear-gradient(135deg,#fff3c4,rgba(255,200,87,.5) 45%,rgba(120,220,255,.8)) border-box;background-color:rgba(8,38,150,.38)}
+.brand{background:none;-webkit-text-fill-color:#fff;color:#fff;font-weight:900;text-shadow:0 2px 0 #0a3fb0,0 0 16px rgba(10,60,200,.9),0 0 4px rgba(0,20,100,.8)}
+.big,.wallet .big{color:#fff;text-shadow:0 2px 0 #9a6a00,0 0 20px rgba(255,200,87,.95),0 3px 10px rgba(0,25,110,.6)}
+.gl{color:#fff;text-shadow:0 1px 3px rgba(0,25,110,.9);font-weight:800}
+.pk .pp{color:#fff;font-weight:900;text-shadow:0 0 14px rgba(32,235,255,1),0 1px 3px rgba(0,25,110,.9)}
+.pos{color:#6dffb5;font-weight:800;text-shadow:0 1px 3px rgba(0,50,40,.8)}.neg{color:#ff9aa6;font-weight:800;text-shadow:0 1px 3px rgba(80,0,20,.7)}
+.tile span{font-weight:800;text-shadow:0 1px 3px rgba(2,18,95,.95)}.chip{color:#fff;font-weight:700;text-shadow:0 1px 3px rgba(2,18,95,.8)}.tag{font-weight:700}
+nav button{font-weight:700}nav button:not(.on){opacity:.95}
+/* ---- flowing water + big diamond ---- */
+#flow,.wv,#gembig{position:fixed;pointer-events:none;z-index:0}
+#flow{inset:0;background:linear-gradient(180deg,rgba(255,255,255,.28),transparent 28%,rgba(168,85,247,.3) 62%,rgba(32,217,255,.3));background-size:100% 260%;animation:flow 9s ease-in-out infinite}
+@keyframes flow{0%,100%{background-position:50% 0}50%{background-position:50% 100%}}
+.wv{left:0;bottom:0;width:200%;height:190px;background-repeat:repeat-x;background-size:50% 100%}
+.w1{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60C150 0 300 120 450 60S750 0 900 60 1050 120 1200 60V120H0Z' fill='%23ffffff' fill-opacity='0.22'/%3E%3C/svg%3E");animation:wvx 16s linear infinite,wvy 6s ease-in-out infinite}
+.w2{height:150px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60C150 0 300 120 450 60S750 0 900 60 1050 120 1200 60V120H0Z' fill='%2320D9FF' fill-opacity='0.28'/%3E%3C/svg%3E");animation:wvx 11s linear infinite reverse,wvy 5s ease-in-out infinite -2s}
+.w3{height:110px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60C150 0 300 120 450 60S750 0 900 60 1050 120 1200 60V120H0Z' fill='%23A855F7' fill-opacity='0.32'/%3E%3C/svg%3E");animation:wvx 8s linear infinite,wvy 4s ease-in-out infinite -1s}
+@keyframes wvx{to{transform:translateX(-50%)}}@keyframes wvy{0%,100%{translate:0 0}50%{translate:0 -22px}}
+#gembig{left:50%;bottom:76px;width:min(78vw,300px);margin-left:calc(min(78vw,300px)/-2);animation:fy 5s ease-in-out infinite;filter:drop-shadow(0 0 26px rgba(32,217,255,.95)) drop-shadow(0 0 60px rgba(168,85,247,.7))}
+#gembig svg{width:100%;display:block}
+@keyframes tw{0%,100%{opacity:.15;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
+.st{transform-box:fill-box;transform-origin:center;animation:tw 2.4s ease-in-out infinite}
+
+/* ---- diamond scene like the reference ---- */
+#shade,#ribbons{position:fixed;left:0;right:0;pointer-events:none;z-index:0}
+#shade{bottom:0;height:360px;background:linear-gradient(transparent,rgba(48,20,150,.5) 55%,rgba(14,8,80,.88))}
+#ribbons{bottom:60px;width:100%;height:240px;filter:drop-shadow(0 0 8px rgba(168,85,247,.9))}
+.rb{stroke-dasharray:220 90;animation:rbf 7s linear infinite}.r2{animation-duration:5s;animation-direction:reverse}.r3{animation-duration:9s}.r4{animation-duration:6s;animation-direction:reverse}
+@keyframes rbf{to{stroke-dashoffset:-620}}
+#gembig{left:auto;right:-8px;margin:0;bottom:82px;width:min(64vw,260px);filter:drop-shadow(0 0 22px rgba(80,190,255,1)) drop-shadow(0 0 50px rgba(168,85,247,.85))}
+nav button.on{background:radial-gradient(circle at 50% 45%,rgba(255,200,87,.38),transparent 72%)}
+</style></head><body><div id="flow"></div><div class="wv w1"></div><div class="wv w2"></div><div class="wv w3"></div>
+<div id="shade"></div>
+<svg id="ribbons" viewBox="0 0 400 240" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="rg1" x1="0" x2="1"><stop offset="0" stop-color="#A855F7" stop-opacity="0"/><stop offset=".45" stop-color="#A855F7"/><stop offset="1" stop-color="#20D9FF"/></linearGradient><linearGradient id="rg2" x1="0" x2="1"><stop offset="0" stop-color="#20D9FF" stop-opacity="0"/><stop offset=".5" stop-color="#7fd0ff"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
+<g fill="none" stroke-linecap="round"><path class="rb" stroke="url(#rg1)" stroke-width="5" d="M-10 150C70 90 140 190 230 150S350 70 410 110"/><path class="rb r2" stroke="url(#rg2)" stroke-width="3" d="M-10 175C80 130 150 215 240 172S360 110 410 140"/><path class="rb r3" stroke="url(#rg1)" stroke-width="2" d="M-10 120C90 60 170 160 250 115S350 40 410 80"/><path class="rb r4" stroke="url(#rg2)" stroke-width="1.5" d="M-10 200C100 160 170 235 260 190S360 150 410 170"/></g></svg>
+<div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity=".9" stroke-width="1.6" stroke-linejoin="round" fill-opacity=".8"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
+<g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
+<div id="app"></div><nav><div id="nav"></div></nav>
 <script>
 (function(){
 var tg=window.Telegram&&window.Telegram.WebApp;if(tg){try{tg.ready();tg.expand()}catch(e){}}
