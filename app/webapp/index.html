@@ -240,7 +240,7 @@ body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transpar
 (function(){
 var tg=window.Telegram&&window.Telegram.WebApp;if(tg){try{tg.ready();tg.expand()}catch(e){}}
 var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wallet:["កាបូប","Wallet"],orders:["Order","Orders"],profile:["ប្រវត្តិរូប","Profile"],
- deposit:["ដាក់ប្រាក់","Deposit"],bal:["សមតុល្យ","Balance"],games:["ហ្គេមរបស់យើង","Our Games"],hot:["កញ្ចប់ពេញនិយម","Hot Packages"],
+ deposit:["ដាក់ប្រាក់","Deposit"],bal:["សមតុល្យ","Balance"],games:["ប្រភេទហ្គេម","Our Games"],hot:["កញ្ចប់ដែលលក់ដាច់បំផុត","Hot Packages"],
  buy:["ទិញ","Buy"],pid:["Player ID","Player ID"],sid:["Zone / Server ID","Zone / Server ID"],close:["បិទ","Close"],back:["← ត្រឡប់","← Back"],
  warn:["⚠️ សូមពិនិត្យ ID ឱ្យបានច្បាស់។ ID ខុសអាចធ្វើឱ្យយឺត ឬបរាជ័យ។","⚠️ Please double-check the ID. A wrong ID can delay or fail delivery."],
  done:["✅ ទិញជោគជ័យ! Order #","✅ Purchased! Order #"],doneSub:["លទ្ធផលនឹងផ្ញើក្នុង bot។","The result will be sent in the bot."],
@@ -329,7 +329,9 @@ function home(box){var u=el("div","card top");var a=el("div","av",((st.acct&&st.
  if(st.signed)box.appendChild(u);box.appendChild(balCard());
  if(st.banner){var bn=el("div","card banner",st.banner);box.appendChild(bn)}
  box.appendChild(el("h3","",T("games")));var h=el("div","hs");st.games.slice(0,10).forEach(function(g){h.appendChild(gameTile(g))});box.appendChild(h);
- box.appendChild(el("h3","",T("hot")));var n=0;st.games.forEach(function(g){g.products.slice(0,2).forEach(function(p){if(n++<4)box.appendChild(pkg(p,g))})})}
+ box.appendChild(el("h3","",T("hot")));var IDS=[34,26,38];var all=[];st.games.forEach(function(g){g.products.forEach(function(p){all.push([p,g])})});IDS.forEach(function(i){var f=all.filter(function(x){return Number(x[0].id)===i})[0];if(f)box.appendChild(pkg(f[0],f[1]))});return;
+var HOT=["Weekly Pass","Weekly Lite","Monthly Pass"];var all=[];st.games.forEach(function(g){g.products.forEach(function(p){all.push([p,g])})});HOT.forEach(function(nm){var f=all.filter(function(x){return x[0].name.trim().toLowerCase()===nm.toLowerCase()})[0];if(f)box.appendChild(pkg(f[0],f[1]))});return;
+(function(g){g.products.slice(0,2).forEach(function(p){if(n++<4)box.appendChild(pkg(p,g))})})}
 function store(box){if(!st.games.length){box.appendChild(el("div","note",T("empty")));return}
  var g=st.games.filter(function(x){return x.code===st.game})[0];
  if(!g){var gr=el("div","gg");st.games.forEach(function(x){gr.appendChild(gameTile(x))});box.appendChild(gr);return}
