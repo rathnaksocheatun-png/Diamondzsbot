@@ -166,6 +166,25 @@ nav button.on{background:radial-gradient(circle at 50% 45%,rgba(255,200,87,.38),
 .tag.completed{background:linear-gradient(180deg,#3deba5,#0a9a60);color:#fff}
 .tag.cancelled{background:linear-gradient(180deg,#ff8c9c,#d62e4d);color:#fff}
 .chip{background:rgba(10,40,150,.45);border-color:rgba(255,255,255,.65)}.chip.on{background:linear-gradient(100deg,#126BFF,#A855F7)}
+
+/* ---- smooth buttons (only transform/opacity are animated) ---- */
+@keyframes halo{0%,100%{opacity:.25;transform:scale(.97)}50%{opacity:.95;transform:scale(1.07)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes sheen{from{background-position:210% 0,0 0}to{background-position:-110% 0,0 0}}
+@keyframes flowY{0%,100%{transform:translateY(-10%)}50%{transform:translateY(10%)}}
+.btn{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.btn:not(.alt){position:relative;isolation:isolate;overflow:visible;will-change:transform}
+.btn:not(.alt):not(.gold){--gc:rgba(32,217,255,.95);background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.6) 50%,transparent 62%) 210% 0/250% 100% no-repeat,linear-gradient(180deg,#7be8ff,#2a95ff 50%,#126BFF);
+ box-shadow:0 5px 0 #0a3fb0,inset 0 2px 0 rgba(255,255,255,.75);animation:breathe 2.6s ease-in-out infinite,sheen 3.4s ease-in-out infinite}
+.btn.gold{--gc:rgba(255,200,87,.95);background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.75) 50%,transparent 62%) 210% 0/250% 100% no-repeat,linear-gradient(180deg,#fff1c2,#ffc857 55%,#f3a81d);
+ box-shadow:0 5px 0 #a8730a,inset 0 2px 0 rgba(255,255,255,.85);animation:breathe 2.8s ease-in-out infinite,sheen 3.8s ease-in-out infinite}
+.btn:not(.alt):before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;box-shadow:0 0 22px 5px var(--gc);animation:halo 2.2s ease-in-out infinite;will-change:transform,opacity}
+.btn:not(.alt):after{content:none}
+.btn.alt,.chip,.chip.on{animation:none}.btn.alt{box-shadow:0 4px 0 rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.7)}
+.chip.on{box-shadow:0 0 14px rgba(168,85,247,.6)}
+#flow{inset:-25% 0;background-size:100% 100%;animation:flowY 9s ease-in-out infinite;will-change:transform}
+.wv,#gembig{will-change:transform}
+.card{animation:up .55s cubic-bezier(.2,.8,.2,1) both}#app>.card:nth-child(2){animation-delay:0.06s}#app>.card:nth-child(3){animation-delay:0.12s}#app>.card:nth-child(4){animation-delay:0.18s}#app>.card:nth-child(5){animation-delay:0.24s}#app>.card:nth-child(6){animation-delay:0.30s}#app>.card:nth-child(7){animation-delay:0.36s}#app>.card:nth-child(8){animation-delay:0.42s}#app>.card:nth-child(9){animation-delay:0.48s}
 </style></head><body><div id="flow"></div><div class="wv w1"></div><div class="wv w2"></div><div class="wv w3"></div>
 <div id="shade"></div>
 <svg id="ribbons" viewBox="0 0 400 240" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="rg1" x1="0" x2="1"><stop offset="0" stop-color="#A855F7" stop-opacity="0"/><stop offset=".45" stop-color="#A855F7"/><stop offset="1" stop-color="#20D9FF"/></linearGradient><linearGradient id="rg2" x1="0" x2="1"><stop offset="0" stop-color="#20D9FF" stop-opacity="0"/><stop offset=".5" stop-color="#7fd0ff"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
@@ -297,6 +316,7 @@ function load(){st.failed=false;document.getElementById("app").textContent="…"
  .catch(function(){st.failed=true;draw()})}
 (function(){var d=document.createElement("div");d.id="snow";for(var i=0;i<18;i++){var x=document.createElement("span");x.textContent="💎";
  x.style.cssText="left:"+(Math.random()*100)+"%;font-size:"+(10+Math.random()*9)+"px;opacity:"+(.45+Math.random()*.4)+";animation-duration:"+(11+Math.random()*9)+"s,"+(3+Math.random()*3)+"s;animation-delay:-"+(Math.random()*18)+"s,0s";d.appendChild(x)}document.body.appendChild(d)})();
+document.addEventListener("pointerdown",function(e){var b=e.target.closest&&e.target.closest("button,.tile,.card.buy");if(b){try{tg.HapticFeedback.impactOccurred("light")}catch(x){}}},{passive:true});
 load();
 })();
 </script></body></html>
