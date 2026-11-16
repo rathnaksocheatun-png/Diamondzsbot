@@ -202,7 +202,20 @@ nav button.on{background:radial-gradient(circle at 50% 45%,rgba(255,200,87,.38),
 /* ---- calmer background + new logo ---- */
 body:before,body:after{animation:none}
 .top img.lg,.hero img.lg{width:112px;height:auto;max-height:84px;border:0;border-radius:0;background:none;box-shadow:none;object-fit:contain;filter:drop-shadow(0 0 12px rgba(32,217,255,.85))}
-</style></head><body><div id="shade"></div>
+/* ---- brighter, shinier background + 5 small floating diamonds (delete this block to go back) ---- */
+body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transparent 65%),radial-gradient(50% 26% at 90% 40%,rgba(255,255,255,.5),transparent 65%),radial-gradient(70% 32% at 30% 100%,rgba(255,255,255,.55),transparent 70%),radial-gradient(45% 22% at 78% 84%,rgba(255,255,255,.4),transparent 70%),linear-gradient(180deg,#8fdcff 0,#4fb8ff 24%,#2f9bff 50%,#4f7dff 74%,#8b6bff 100%) fixed}
+#shade{height:460px;background:radial-gradient(70% 55% at 50% 100%,rgba(255,255,255,.5),transparent 70%),linear-gradient(transparent,rgba(135,100,255,.4) 55%,rgba(190,130,255,.6))}
+#glint{position:fixed;top:-10%;bottom:-10%;left:-45%;right:-45%;pointer-events:none;z-index:0;will-change:transform;background:linear-gradient(112deg,transparent 40%,rgba(255,255,255,.18) 46%,rgba(255,255,255,.5) 50%,rgba(255,255,255,.18) 54%,transparent 60%);animation:glint 8s ease-in-out infinite}
+@keyframes glint{0%,100%{transform:translateX(-22%)}50%{transform:translateX(22%)}}
+.gs{position:fixed;pointer-events:none;z-index:0;will-change:transform;filter:drop-shadow(0 0 7px rgba(255,255,255,.95)) drop-shadow(0 0 16px var(--gc,rgba(60,180,255,.85)));animation:gf 6s ease-in-out infinite}
+.gs svg{display:block;width:100%}
+@keyframes gf{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-14px) rotate(6deg)}}
+.g1{top:17%;left:5%;width:46px}
+.g2{top:31%;right:6%;width:58px;--gc:rgba(190,120,255,.9);animation-duration:7.5s;animation-delay:-2s}
+.g3{top:55%;left:3%;width:66px;animation-duration:6.5s;animation-delay:-4s}
+.g4{bottom:15%;left:7%;width:52px;--gc:rgba(235,130,255,.9);animation-duration:8s;animation-delay:-1s}
+.g5{top:8.5%;right:26%;width:34px;--gc:rgba(255,255,255,.9);animation-duration:5.5s;animation-delay:-3s}
+</style></head><body><div id="shade"></div><div id="glint"></div>
 <div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity="1" stroke-width="2" stroke-linejoin="round" fill-opacity=".48"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
 <g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
 <div id="app"></div><nav><div id="nav"></div></nav>
@@ -335,6 +348,7 @@ function load(){st.failed=false;document.getElementById("app").textContent="…"
  .catch(function(){st.failed=true;draw()})}
 (function(){var d=document.createElement("div");d.id="snow";for(var i=0;i<18;i++){var x=document.createElement("span");x.textContent="💎";
  x.style.cssText="left:"+(Math.random()*100)+"%;font-size:"+(10+Math.random()*9)+"px;opacity:"+(.45+Math.random()*.4)+";animation-duration:"+(11+Math.random()*9)+"s,"+(3+Math.random()*3)+"s;animation-delay:-"+(Math.random()*18)+"s,0s";d.appendChild(x)}document.body.appendChild(d)})();
+(function(){var big=document.querySelector("#gembig svg");if(!big)return;for(var i=1;i<=5;i++){var d=document.createElement("div");d.className="gs g"+i;d.setAttribute("aria-hidden","true");d.appendChild(big.cloneNode(true));document.body.appendChild(d)}})();
 document.addEventListener("pointerdown",function(e){var b=e.target.closest&&e.target.closest("button,.tile,.card.buy");if(b){try{tg.HapticFeedback.impactOccurred("light")}catch(x){}}},{passive:true});
 load();
 })();
