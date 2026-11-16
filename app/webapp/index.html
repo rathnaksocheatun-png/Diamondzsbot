@@ -215,6 +215,23 @@ body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transpar
 .g3{top:55%;left:3%;width:66px;animation-duration:6.5s;animation-delay:-4s}
 .g4{bottom:15%;left:7%;width:52px;--gc:rgba(235,130,255,.9);animation-duration:8s;animation-delay:-1s}
 .g5{top:8.5%;right:26%;width:34px;--gc:rgba(255,255,255,.9);animation-duration:5.5s;animation-delay:-3s}
+
+/* ---- bright back button + bold colorful headings ---- */
+@keyframes bkglow{0%,100%{transform:scale(.97);opacity:.45}50%{transform:scale(1.06);opacity:1}}
+.btn.back{position:relative;isolation:isolate;overflow:visible;padding:10px 22px;font-size:15px;font-weight:900;letter-spacing:.3px;color:#fff;
+ border:1.5px solid #fff;border-radius:999px;background:linear-gradient(180deg,#ffb3e6,#ff5fb8 52%,#c93bff);
+ text-shadow:0 1px 2px rgba(120,0,90,.8),0 0 8px rgba(120,0,90,.45);
+ box-shadow:0 5px 0 #8f1fb8,inset 0 2px 0 rgba(255,255,255,.85);animation:none}
+.btn.back:before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;box-shadow:0 0 22px 4px rgba(255,105,200,.9);animation:bkglow 2.2s ease-in-out infinite}
+.btn.back:after{content:none}
+.btn.back:active{transform:translateY(3px) scale(.96)!important;box-shadow:0 2px 0 #8f1fb8,inset 0 2px 0 rgba(255,255,255,.6)}
+#app>h3{width:fit-content;font-size:21px;font-weight:900;letter-spacing:.4px;line-height:1.55;color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
+ background:linear-gradient(90deg,#fff6bf 0%,#ffd45a 45%,#ff9bd8 100%);-webkit-background-clip:text;background-clip:text;
+ filter:drop-shadow(0 2px 0 #0a3fb0) drop-shadow(0 0 10px rgba(10,50,190,.75))}
+#app>h3:before{width:6px;height:24px;border-radius:3px;background:linear-gradient(#fff6bf,#ff6fbe);box-shadow:0 0 10px rgba(255,120,200,.9)}
+#app>h3.gt{background:none;-webkit-text-fill-color:initial;filter:none;color:#fff;gap:8px}
+#app>h3.gt .tx{background:linear-gradient(90deg,#fff6bf 0%,#ffd45a 45%,#ff9bd8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 0 #0a3fb0) drop-shadow(0 0 10px rgba(10,50,190,.75))}
+#app>h3.gt:before{filter:drop-shadow(0 0 4px rgba(10,50,190,.6))}
 </style></head><body><div id="shade"></div><div id="glint"></div>
 <div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity="1" stroke-width="2" stroke-linejoin="round" fill-opacity=".48"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
 <g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
@@ -316,7 +333,7 @@ function home(box){var u=el("div","card top");var a=el("div","av",((st.acct&&st.
 function store(box){if(!st.games.length){box.appendChild(el("div","note",T("empty")));return}
  var g=st.games.filter(function(x){return x.code===st.game})[0];
  if(!g){var gr=el("div","gg");st.games.forEach(function(x){gr.appendChild(gameTile(x))});box.appendChild(gr);return}
- var b=el("button","btn s alt",T("back"));b.onclick=function(){st.game=null;draw()};box.appendChild(b);box.appendChild(el("h3","",g.emoji+" "+g.name));
+ var b=el("button","btn s alt back",T("back"));b.onclick=function(){st.game=null;draw()};box.appendChild(b);var gh=el("h3","gt");gh.appendChild(el("span","",g.emoji));gh.appendChild(el("span","tx",g.name));box.appendChild(gh);
  g.products.forEach(function(p){box.appendChild(pkg(p,g))})}
 function when(s){return(s||"").slice(0,16)}
 function wallet(box){if(gate(box))return;box.appendChild(balCard());box.appendChild(el("h3","",T("hist")));var t=(st.acct&&st.acct.transactions)||[];
