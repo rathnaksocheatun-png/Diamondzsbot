@@ -84,6 +84,7 @@ nav{background:rgba(10,42,150,.62);border-top:1px solid rgba(255,255,255,.35)}
 .sheet{background:linear-gradient(180deg,#2a78ff,#0c2fa8);border-color:rgba(255,255,255,.4)}
 .sheet input{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.5);color:#fff}.ov{background:rgba(3,14,70,.6)}
 .hb{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 20%;border:0;border-radius:0;box-shadow:none;background:none;margin-bottom:12px;animation:up .5s both;
+ /* no frame: all four edges melt softly into the page (sides 7%, top 5%, bottom 7%) - raise a number for a softer edge */
  -webkit-mask-image:linear-gradient(to right,transparent,#000 7%,#000 93%,transparent),linear-gradient(to bottom,transparent,#000 5%,#000 93%,transparent);-webkit-mask-composite:source-in;
  mask-image:linear-gradient(to right,transparent,#000 7%,#000 93%,transparent),linear-gradient(to bottom,transparent,#000 5%,#000 93%,transparent);mask-composite:intersect}
 /* ---- animations on every button ---- */
@@ -101,7 +102,7 @@ nav button.on b{animation:fy 1.8s ease-in-out infinite}button{transition:transfo
 @keyframes fall{to{transform:translateY(115vh) rotate(40deg)}}@keyframes sway{from{translate:-16px 0}to{translate:16px 0}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}#snow{display:none}}
 
-/* ---- sky + 3D glass ---- */
+/* ---- sky + 3D glass (like the reference) ---- */
 @keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(70px)}}
 body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transparent 65%),radial-gradient(50% 26% at 90% 40%,rgba(255,255,255,.35),transparent 65%),radial-gradient(70% 30% at 30% 100%,rgba(255,255,255,.4),transparent 70%),linear-gradient(180deg,#8fdcff 0,#46a3ff 30%,#2262ee 65%,#1237b8 100%) fixed}
 body:before{width:340px;height:150px;left:-90px;top:110px;background:rgba(255,255,255,.55);filter:blur(34px);animation:drift 22s ease-in-out infinite}
@@ -126,7 +127,7 @@ nav button{color:#e6f2ff}#app{padding-bottom:116px}
 
 /* ---- readable text ---- */
 :root{--hint:#fff}
-.nm,.sub,.pn,.note,.msg,.sheet label,nav button{color:#fff;text-shadow:0 1px 2px rgba(2,18,95,.85),0 0 10px rgba(2,18,95,.55)}
+.nm,.sub,.pn,.note,h3,.msg,.sheet label,nav button{color:#fff;text-shadow:0 1px 2px rgba(2,18,95,.85),0 0 10px rgba(2,18,95,.55)}
 .nm{font-weight:800}.sub{font-weight:600;opacity:1}.pk .pn{font-weight:800;font-size:15px}.note{font-weight:600}
 .card,.hero,.wallet{background:linear-gradient(160deg,rgba(255,255,255,.3),rgba(255,255,255,.05) 45%,rgba(255,255,255,.12)) padding-box,linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,255,255,.2) 40%,rgba(120,220,255,.85)) border-box;background-color:rgba(8,38,150,.34)}
 .wallet{background:linear-gradient(160deg,rgba(255,214,120,.38),rgba(255,255,255,.05) 55%,rgba(255,200,87,.2)) padding-box,linear-gradient(135deg,#fff3c4,rgba(255,200,87,.5) 45%,rgba(120,220,255,.8)) border-box;background-color:rgba(8,38,150,.38)}
@@ -151,7 +152,7 @@ nav button{font-weight:700}nav button:not(.on){opacity:.95}
 @keyframes tw{0%,100%{opacity:.15;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
 .st{transform-box:fill-box;transform-origin:center;animation:tw 2.4s ease-in-out infinite}
 
-/* ---- diamond scene ---- */
+/* ---- diamond scene like the reference ---- */
 #shade,#ribbons{position:fixed;left:0;right:0;pointer-events:none;z-index:0}
 #shade{bottom:0;height:360px;background:linear-gradient(transparent,rgba(48,20,150,.5) 55%,rgba(14,8,80,.88))}
 #ribbons{bottom:60px;width:100%;height:240px;filter:drop-shadow(0 0 8px rgba(168,85,247,.9))}
@@ -169,7 +170,7 @@ nav button.on{background:radial-gradient(circle at 50% 45%,rgba(255,200,87,.38),
 .tag.cancelled{background:linear-gradient(180deg,#ff8c9c,#d62e4d);color:#fff}
 .chip{background:rgba(10,40,150,.45);border-color:rgba(255,255,255,.65)}.chip.on{background:linear-gradient(100deg,#126BFF,#A855F7)}
 
-/* ---- smooth buttons ---- */
+/* ---- smooth buttons (only transform/opacity are animated) ---- */
 @keyframes halo{0%,100%{opacity:.25;transform:scale(.97)}50%{opacity:.95;transform:scale(1.07)}}
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
 @keyframes sheen{from{background-position:210% 0,0 0}to{background-position:-110% 0,0 0}}
@@ -201,7 +202,7 @@ nav button.on{background:radial-gradient(circle at 50% 45%,rgba(255,200,87,.38),
 /* ---- calmer background + new logo ---- */
 body:before,body:after{animation:none}
 .top img.lg,.hero img.lg{width:112px;height:auto;max-height:84px;border:0;border-radius:0;background:none;box-shadow:none;object-fit:contain;filter:drop-shadow(0 0 12px rgba(32,217,255,.85))}
-/* ---- brighter, shinier background + 5 small floating diamonds ---- */
+/* ---- brighter, shinier background + 5 small floating diamonds (delete this block to go back) ---- */
 body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transparent 65%),radial-gradient(50% 26% at 90% 40%,rgba(255,255,255,.5),transparent 65%),radial-gradient(70% 32% at 30% 100%,rgba(255,255,255,.55),transparent 70%),radial-gradient(45% 22% at 78% 84%,rgba(255,255,255,.4),transparent 70%),linear-gradient(180deg,#8fdcff 0,#4fb8ff 24%,#2f9bff 50%,#4f7dff 74%,#8b6bff 100%) fixed}
 #shade{height:460px;background:radial-gradient(70% 55% at 50% 100%,rgba(255,255,255,.5),transparent 70%),linear-gradient(transparent,rgba(135,100,255,.4) 55%,rgba(190,130,255,.6))}
 #glint{position:fixed;top:-10%;bottom:-10%;left:-45%;right:-45%;pointer-events:none;z-index:0;will-change:transform;background:linear-gradient(112deg,transparent 40%,rgba(255,255,255,.18) 46%,rgba(255,255,255,.5) 50%,rgba(255,255,255,.18) 54%,transparent 60%);animation:glint 8s ease-in-out infinite}
@@ -215,34 +216,22 @@ body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transpar
 .g4{bottom:15%;left:7%;width:52px;--gc:rgba(235,130,255,.9);animation-duration:8s;animation-delay:-1s}
 .g5{top:8.5%;right:26%;width:34px;--gc:rgba(255,255,255,.9);animation-duration:5.5s;animation-delay:-3s}
 
-/* ---- កែសម្រួលប៊ូតុង "ត្រឡប់" និងចំណងជើង "ប្រភេទហ្គេម" / "កញ្ចប់ពេញនិយម" ---- */
-.btn.back-btn{
-  background:linear-gradient(180deg,#a6f7ff 0%,#28d4ff 50%,#0084ff 100%) !important;
-  color:#ffffff !important;
-  font-weight:900 !important;
-  font-size:14px !important;
-  padding:10px 18px !important;
-  border:1.5px solid #ffffff !important;
-  border-radius:16px !important;
-  text-shadow:0 1px 4px rgba(0,30,110,.85) !important;
-  box-shadow:0 4px 0 #0051b3, 0 0 22px rgba(40,212,255,.95), inset 0 2px 0 rgba(255,255,255,.9) !important;
-}
-h3{
-  font-size:19px !important;
-  font-weight:900 !important;
-  letter-spacing:.4px !important;
-  background:linear-gradient(90deg,#ffffff 0%,#fff2a6 55%,#7be8ff 100%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  -webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 2px 2px rgba(2,15,85,.95)) drop-shadow(0 0 10px rgba(32,217,255,.75));
-}
-h3:before{
-  width:5px !important;
-  height:19px !important;
-  background:linear-gradient(180deg,#ffe066,#20D9FF) !important;
-  box-shadow:0 0 10px rgba(255,224,102,.95);
-}
+/* ---- bright back button + bold colorful headings ---- */
+@keyframes bkglow{0%,100%{transform:scale(.97);opacity:.45}50%{transform:scale(1.06);opacity:1}}
+.btn.back{position:relative;isolation:isolate;overflow:visible;padding:10px 22px;font-size:15px;font-weight:900;letter-spacing:.3px;color:#fff;
+ border:1.5px solid #fff;border-radius:999px;background:linear-gradient(180deg,#ffb3e6,#ff5fb8 52%,#c93bff);
+ text-shadow:0 1px 2px rgba(120,0,90,.8),0 0 8px rgba(120,0,90,.45);
+ box-shadow:0 5px 0 #8f1fb8,inset 0 2px 0 rgba(255,255,255,.85);animation:none}
+.btn.back:before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;box-shadow:0 0 22px 4px rgba(255,105,200,.9);animation:bkglow 2.2s ease-in-out infinite}
+.btn.back:after{content:none}
+.btn.back:active{transform:translateY(3px) scale(.96)!important;box-shadow:0 2px 0 #8f1fb8,inset 0 2px 0 rgba(255,255,255,.6)}
+#app>h3{width:fit-content;font-size:21px;font-weight:900;letter-spacing:.4px;line-height:1.55;color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
+ background:linear-gradient(90deg,#fff6bf 0%,#ffd45a 45%,#ff9bd8 100%);-webkit-background-clip:text;background-clip:text;
+ filter:drop-shadow(0 2px 0 #0a3fb0) drop-shadow(0 0 10px rgba(10,50,190,.75))}
+#app>h3:before{width:6px;height:24px;border-radius:3px;background:linear-gradient(#fff6bf,#ff6fbe);box-shadow:0 0 10px rgba(255,120,200,.9)}
+#app>h3.gt{background:none;-webkit-text-fill-color:initial;filter:none;color:#fff;gap:8px}
+#app>h3.gt .tx{background:linear-gradient(90deg,#fff6bf 0%,#ffd45a 45%,#ff9bd8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 0 #0a3fb0) drop-shadow(0 0 10px rgba(10,50,190,.75))}
+#app>h3.gt:before{filter:drop-shadow(0 0 4px rgba(10,50,190,.6))}
 </style></head><body><div id="shade"></div><div id="glint"></div>
 <div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity="1" stroke-width="2" stroke-linejoin="round" fill-opacity=".48"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
 <g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
@@ -251,7 +240,7 @@ h3:before{
 (function(){
 var tg=window.Telegram&&window.Telegram.WebApp;if(tg){try{tg.ready();tg.expand()}catch(e){}}
 var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wallet:["កាបូប","Wallet"],orders:["Order","Orders"],profile:["ប្រវត្តិរូប","Profile"],
- deposit:["ដាក់ប្រាក់","Deposit"],bal:["សមតុល្យ","Balance"],games:["ប្រភេទហ្គេម","Our Games"],hot:["កញ្ចប់ពេញនិយម","Hot Packages"],
+ deposit:["ដាក់ប្រាក់","Deposit"],bal:["សមតុល្យ","Balance"],games:["ប្រភេទហ្គេម","Our Games"],hot:["កញ្ចប់ដែលលក់ដាច់បំផុត","Hot Packages"],
  buy:["ទិញ","Buy"],pid:["Player ID","Player ID"],sid:["Zone / Server ID","Zone / Server ID"],close:["បិទ","Close"],back:["← ត្រឡប់","← Back"],
  warn:["⚠️ សូមពិនិត្យ ID ឱ្យបានច្បាស់។ ID ខុសអាចធ្វើឱ្យយឺត ឬបរាជ័យ។","⚠️ Please double-check the ID. A wrong ID can delay or fail delivery."],
  done:["✅ ទិញជោគជ័យ! Order #","✅ Purchased! Order #"],doneSub:["លទ្ធផលនឹងផ្ញើក្នុង bot។","The result will be sent in the bot."],
@@ -264,13 +253,13 @@ var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wall
  tag:["ហាងបញ្ចូលហ្គេម","Gaming Top-Up Store"],bn:["សូមបើកតាម Telegram ដើម្បីមើលផ្នែកនេះ។","Open this from Telegram to see this section."],
  ob:["បើក bot ក្នុង Telegram","Open the bot in Telegram"],empty:["មិនទាន់មានផលិតផលទេ។","No packages yet."],
  err:["មិនអាចទាញទិន្នន័យបានទេ។","Could not load the shop."],retry:["ព្យាយាមម្តងទៀត","Try again"],
- about:["Diamond ZS · ទិញពេជ្រលឿន និងសុវត្ថិភាព","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយ! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ សូមបង្កើតថ្មី។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"],abc:["ID មានអក្សរ? ប្តូរទៅ ABC","ID has letters? Switch to ABC"],num:["ប្តូរត្រឡប់ទៅលេខ (123)","Back to numbers (123)"]};
+ about:["Diamond ZS · ទិញពេជ្រលឿន និងសុវត្ថិភាព","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយ! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ សូមបង្កើតថ្មី។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"],guide:["របៀបប្រើ","How to use"],guideStop:["ឈប់","Stop"],guideErr:["មិនអាចចាក់សំឡេងបាន។","Could not play the audio."],abc:["ID មានអក្សរ? ប្តូរទៅ ABC","ID has letters? Switch to ABC"],num:["ប្តូរត្រឡប់ទៅលេខ (123)","Back to numbers (123)"]};
 var E={insufficient:["សមតុល្យមិនគ្រប់។ សូមដាក់ប្រាក់ក្នុង bot រួចត្រឡប់មកវិញ។","Not enough balance. Top up in the bot, then come back."],
  duplicate:["មាន order ដូចគ្នានេះកំពុងដំណើរការរួចហើយ។","The same order is already in progress."],unavailable:["កញ្ចប់នេះមិនអាចទិញបានទេ។","This package is not available."],
  invalid_player_id:["Player ID មិនត្រឹមត្រូវ។","Invalid Player ID."],invalid_server_id:["Zone/Server ID មិនត្រឹមត្រូវ។","Invalid Zone/Server ID."],
  no_user:["សូមចុច /start ក្នុង bot មុន។","Please send /start to the bot first."],rate_limited:["ព្យាយាមញឹកញាប់ពេក សូមរង់ចាំ។","Too many tries. Please wait."],
  bad_amount:["ចំនួនទឹកប្រាក់ត្រូវនៅចន្លោះ $0.50 និង $500។","Amount must be between $0.50 and $500."],deposit_pending:["មាន QR មួយកំពុងរង់ចាំ។ សូមរង់ចាំ ៣ នាទី ឬបោះបង់ក្នុង bot។","A QR is already waiting. Wait 3 minutes or cancel it in the bot."],pay_error:["ប្រព័ន្ធទូទាត់មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Payment system problem. Try again."],no_pay:["ការដាក់ប្រាក់មិនទាន់បើកទេ។","Deposits are not available right now."],busy:["កំពុងដំណើរការ សូមរង់ចាំ។","Still working. Please wait."],error:["មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Something went wrong. Try again."]};
-var st={lang:0,games:[],bot:"",signed:false,bal:null,pay:false,banner:"",tab:"home",game:null,acct:null,filter:"all",failed:false};
+var st={lang:0,games:[],bot:"",signed:false,bal:null,pay:false,banner:"",hot:[],gd:{km:false,en:false},tab:"home",game:null,acct:null,filter:"all",failed:false};
 function T(k){var v=S[k];return v?v[st.lang]:k}
 function el(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x!==undefined)n.textContent=x;return n}
 function money(c){return"$"+(c/100).toFixed(2)}
@@ -280,10 +269,13 @@ function shut(){stopT();if(sheet){sheet.remove();sheet=null}}
 function api(path,body){return fetch(path,{method:"POST",cache:"no-store",headers:{"X-Init-Data":tg.initData,"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json()})}
 function mk(){shut();sheet=el("div","ov");var b=el("div","sheet");sheet.appendChild(b);sheet.onclick=function(e){if(e.target===sheet)shut()};document.body.appendChild(sheet);return b}
 function notice(text){var b=mk();b.appendChild(el("div","msg",text));var c=el("button","btn w",T("close"));c.onclick=function(){shut();if(tg&&st.signed)tg.close()};b.appendChild(c)}
+var AC=null;function beep(f,d){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();var t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.13,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+(d||.07));o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+(d||.07)+.02)}catch(e){}}
+function chime(){beep(784,.16);setTimeout(function(){beep(1047,.28)},130)}
 function pad(inputs){var act=inputs[0];function setAct(i){act=i;inputs.forEach(function(x){x.classList.toggle("act",x===i)})}
  inputs.forEach(function(i){i.readOnly=true;i.inputMode="none";i.onclick=function(){setAct(i)}});setAct(inputs[0]);
  var g=el("div","kp");["1","2","3","4","5","6","7","8","9","C","0","⌫"].forEach(function(k){var b=el("button","key"+(k==="C"||k==="⌫"?" fn":""),k);b.type="button";
-  b.onclick=function(){var v=act.value;if(k==="⌫")v=v.slice(0,-1);else if(k==="C")v="";else if(v.length<20)v+=k;act.value=v};g.appendChild(b)});return g}
+  b.onclick=function(){beep(k==="⌫"?420:k==="C"?330:620+Number(k)*45);var v=act.value;if(k==="⌫")v=v.slice(0,-1);else if(k==="C")v="";else if(v.length<20)v+=k;act.value=v};g.appendChild(b)});return g}
 function buy(p,g){var b=mk();b.appendChild(el("h3","",p.emoji+" "+p.name));b.appendChild(el("div","sub",g.name+" · "+money(p.price_cents)+" · "+T("bal")+" "+money(st.bal)));
  b.appendChild(el("label","",T("pid")));var pid=el("input");b.appendChild(pid);
  var sid=el("input");if(g.needs_server){b.appendChild(el("label","",T("sid")));b.appendChild(sid)}
@@ -296,7 +288,7 @@ function buy(p,g){var b=mk();b.appendChild(el("h3","",p.emoji+" "+p.name));b.app
   fetch("/api/order",{method:"POST",cache:"no-store",headers:{"X-Init-Data":tg.initData,"Content-Type":"application/json"},
    body:JSON.stringify({product_id:p.id,player_id:pid.value.trim(),server_id:sid.value.trim()})})
   .then(function(r){return r.json()}).then(function(d){
-   if(d.ok){if(d.balance_cents!=null)st.bal=d.balance_cents;st.acct=null;go.remove();pid.disabled=sid.disabled=true;say(T("done")+d.order_id+"\n"+T("doneSub"),"ok");draw();
+   if(d.ok){if(d.balance_cents!=null)st.bal=d.balance_cents;st.acct=null;go.remove();pid.disabled=sid.disabled=true;say(T("done")+d.order_id+"\n"+T("doneSub"),"ok");draw();chime();
     try{tg.HapticFeedback.notificationOccurred("success")}catch(e){}}
    else{go.disabled=(d.error==="no_user"||d.error==="unavailable");say((E[d.error]||E.error)[st.lang],"err")}})
   .catch(function(){go.remove();say(T("unsure"),"err")})}}
@@ -305,7 +297,7 @@ function showQR(b,d){b.textContent="";var im=el("img");im.src=d.qr;im.alt="KHQR"
  function tick(){var s=Math.max(0,d.expires_in-Math.floor((Date.now()-t0)/1000));cd.textContent=Math.floor(s/60)+":"+("0"+s%60).slice(-2);if(s<=0){stopT();m.textContent=T("expired");m.className="msg err"}}
  tick();timers.push(setInterval(tick,1000));
  timers.push(setInterval(function(){fetch("/api/deposit_status?id="+d.id,{headers:{"X-Init-Data":tg.initData},cache:"no-store"}).then(function(r){return r.json()}).then(function(x){
-  if(x.status==="approved"){stopT();st.bal=x.balance_cents;st.acct=null;m.textContent=T("paid");m.className="msg ok";draw();try{tg.HapticFeedback.notificationOccurred("success")}catch(e){}}
+  if(x.status==="approved"){stopT();st.bal=x.balance_cents;st.acct=null;m.textContent=T("paid");m.className="msg ok";draw();chime();try{tg.HapticFeedback.notificationOccurred("success")}catch(e){}}
   else if(x.status==="rejected"){stopT();m.textContent=T("expired");m.className="msg err"}}).catch(function(){})},4000));
  var c=el("button","btn alt w",T("cancelq"));c.onclick=function(){stopT();api("/api/deposit_cancel",{id:d.id}).then(shut,shut)};b.appendChild(c)}
 function depositSheet(){var b=mk();b.appendChild(el("h3","",T("deposit")));var pre=el("div","hs");var amt=el("input");amt.type="number";amt.inputMode="decimal";amt.step="0.01";
@@ -340,11 +332,21 @@ function home(box){var u=el("div","card top");var a=el("div","av",((st.acct&&st.
  if(st.signed)box.appendChild(u);box.appendChild(balCard());
  if(st.banner){var bn=el("div","card banner",st.banner);box.appendChild(bn)}
  box.appendChild(el("h3","",T("games")));var h=el("div","hs");st.games.slice(0,10).forEach(function(g){h.appendChild(gameTile(g))});box.appendChild(h);
- box.appendChild(el("h3","",T("hot")));var n=0;st.games.forEach(function(g){g.products.slice(0,2).forEach(function(p){if(n++<4)box.appendChild(pkg(p,g))})})}
+ box.appendChild(el("h3","",T("hot")));var IDS=st.hot.length?st.hot.slice(0,8):[34,26,38];var all=[];st.games.forEach(function(g){g.products.forEach(function(p){all.push([p,g])})});IDS.forEach(function(i){var f=all.filter(function(x){return Number(x[0].id)===i})[0];if(f)box.appendChild(pkg(f[0],f[1]))});return;
+var HOT=["Weekly Pass","Weekly Lite","Monthly Pass"];var all=[];st.games.forEach(function(g){g.products.forEach(function(p){all.push([p,g])})});HOT.forEach(function(nm){var f=all.filter(function(x){return x[0].name.trim().toLowerCase()===nm.toLowerCase()})[0];if(f)box.appendChild(pkg(f[0],f[1]))});return;
+(function(g){g.products.slice(0,2).forEach(function(p){if(n++<4)box.appendChild(pkg(p,g))})})}
+var gaud=null;
+function playBtn(){if(!st.gd.km&&!st.gd.en)return el("span");
+ var on=gaud&&!gaud.paused;var b=el("button","btn s gold play",(on?"⏸ ":"▶ ")+T(on?"guideStop":"guide"));
+ b.onclick=function(){if(gaud&&!gaud.paused){gaud.pause();draw();return}
+  var want=st.lang?"en":"km",l=st.gd[want]?want:(st.gd.km?"km":"en");
+  if(!gaud||gaud.lang!==l){if(gaud)gaud.pause();gaud=new Audio("/guide/"+l);gaud.lang=l;gaud.onended=function(){draw()}}
+  var q=gaud.play();if(q&&q.then)q.then(draw).catch(function(){notice(T("guideErr"))})};
+ return b}
 function store(box){if(!st.games.length){box.appendChild(el("div","note",T("empty")));return}
  var g=st.games.filter(function(x){return x.code===st.game})[0];
  if(!g){var gr=el("div","gg");st.games.forEach(function(x){gr.appendChild(gameTile(x))});box.appendChild(gr);return}
- var b=el("button","btn s back-btn",T("back"));b.onclick=function(){st.game=null;draw()};box.appendChild(b);box.appendChild(el("h3","",g.emoji+" "+g.name));
+ var b=el("button","btn s alt back",T("back"));b.onclick=function(){st.game=null;draw()};var rw=el("div","row");rw.appendChild(b);rw.appendChild(el("div","grow"));rw.appendChild(playBtn());box.appendChild(rw);var gh=el("h3","gt");gh.appendChild(el("span","",g.emoji));gh.appendChild(el("span","tx",g.name));box.appendChild(gh);
  g.products.forEach(function(p){box.appendChild(pkg(p,g))})}
 function when(s){return(s||"").slice(0,16)}
 function wallet(box){if(gate(box))return;box.appendChild(balCard());box.appendChild(el("h3","",T("hist")));var t=(st.acct&&st.acct.transactions)||[];
@@ -372,11 +374,12 @@ function account(){fetch("/api/account",{headers:{"X-Init-Data":tg.initData},cac
  if(d&&d.tg_id){st.acct=d;if(d.balance_cents!=null)st.bal=d.balance_cents;draw()}}).catch(function(){})}
 function load(){st.failed=false;document.getElementById("app").textContent="…";
  fetch("/api/catalog",{headers:(tg&&tg.initData)?{"X-Init-Data":tg.initData}:{},cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
-  st.lang=d.lang==="en"?1:0;st.games=d.games||[];st.bot=d.bot||"";st.pay=!!d.pay;st.banner=d.banner||"";st.signed=!!d.signed_in;st.bal=d.balance_cents==null?null:d.balance_cents;draw();if(st.signed)account()})
+  st.lang=d.lang==="en"?1:0;st.games=d.games||[];st.bot=d.bot||"";st.pay=!!d.pay;st.hot=d.hot||[];st.banner=d.banner||"";st.signed=!!d.signed_in;st.bal=d.balance_cents==null?null:d.balance_cents;draw();if(st.signed)account()})
  .catch(function(){st.failed=true;draw()})}
 (function(){var d=document.createElement("div");d.id="snow";for(var i=0;i<18;i++){var x=document.createElement("span");x.textContent="💎";
  x.style.cssText="left:"+(Math.random()*100)+"%;font-size:"+(10+Math.random()*9)+"px;opacity:"+(.45+Math.random()*.4)+";animation-duration:"+(11+Math.random()*9)+"s,"+(3+Math.random()*3)+"s;animation-delay:-"+(Math.random()*18)+"s,0s";d.appendChild(x)}document.body.appendChild(d)})();
 (function(){var big=document.querySelector("#gembig svg");if(!big)return;for(var i=1;i<=5;i++){var d=document.createElement("div");d.className="gs g"+i;d.setAttribute("aria-hidden","true");d.appendChild(big.cloneNode(true));document.body.appendChild(d)}})();
+["km","en"].forEach(function(l){fetch("/guide/"+l,{method:"HEAD",cache:"no-store"}).then(function(r){if(r.ok&&!st.gd[l]){st.gd[l]=true;if(st.tab==="store")draw()}}).catch(function(){})});
 document.addEventListener("pointerdown",function(e){var b=e.target.closest&&e.target.closest("button,.tile,.card.buy");if(b){try{tg.HapticFeedback.impactOccurred("light")}catch(x){}}},{passive:true});
 load();
 })();

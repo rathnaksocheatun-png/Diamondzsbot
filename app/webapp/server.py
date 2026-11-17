@@ -76,6 +76,17 @@ async def _banner_video(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(path, headers={"Cache-Control": "public, max-age=3600"})
 
 
+async def _guide(request: web.Request) -> web.StreamResponse:
+    """Audio guide recorded by the shop owner: guide_km.mp3/.m4a and guide_en.mp3/.m4a."""
+    lang = request.match_info["lang"]
+    if lang in ("km", "en"):
+        for ext in ("mp3", "m4a"):
+            path = HERE / f"guide_{lang}.{ext}"
+            if path.is_file():
+                return web.FileResponse(path, headers={"Cache-Control": "no-cache"})
+    raise web.HTTPNotFound()
+
+
 async def _health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
 
@@ -398,6 +409,7 @@ async def start_webapp(db, bot_token: str, port: int, bot_username: str = "",
         web.get("/", _page),
         web.get("/logo.png", _logo),
         web.get("/banner.jpg", _banner),
+        web.get("/guide/{lang}", _guide),
         web.get("/banner.mp4", _banner_video),
         web.get("/health", _health),
         web.get("/api/catalog", _catalog),
