@@ -23,17 +23,20 @@ _MENU_ROWS = [
 
 
 # Button colours (Telegram: "primary" = blue, "success" = green, "danger" = red).
+# Telegram only allows these colours (plus plain grey when no style is given), so they are
+# alternated like a checkerboard: neighbouring buttons never share a colour.
 _MENU_STYLE = {
-    "buy": "success", "deposit": "success",
-    "orders": "primary", "wallet": "primary", "promos": "primary",
-    "support": "primary", "history": "primary", "howto": "primary",
+    "buy": "danger",     "orders": "primary",     # red    | purple
+    "wallet": "success", "deposit": "danger",     # green  | red
+    "promos": "primary", "support": "success",    # purple | green
+    "history": "danger", "howto": "primary",      # red    | purple
 }
 
 
 # Shop Mini App button shown on top of the main menu (only when WEBAPP_URL is set).
 # It is a normal text button; handlers/start.py answers it with the same "Open shop"
 # button as /app, so the Mini App opens signed-in and ordering works.
-_SHOP_BUTTON_TEXT = {"km": "🛍 ហាង App", "en": "🛍 Open Shop"}
+_SHOP_BUTTON_TEXT = {"km": "📱Buy in Mini App", "en": "🛍 Open Shop"}
 SHOP_BUTTON_TEXTS = frozenset(_SHOP_BUTTON_TEXT.values())
 
 
