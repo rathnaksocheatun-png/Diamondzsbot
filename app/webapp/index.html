@@ -337,8 +337,16 @@ function gameTile(g,open){var t=el("div","card tile");
  else{t.appendChild(el("b","",g.emoji));t.appendChild(el("span","",g.name))}
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
 function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg?v=2";bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
-  var v=document.createElement("video");v.className="hb";v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute("playsinline","");v.poster="/banner.jpg?v=2";v.preload="auto";v.style.display="none";
-  v.oncanplay=function(){v.style.display="block";bi.style.display="none";var q=v.play();if(q&&q.catch)q.catch(function(){})};v.src="/banner.mp4?v=2";w.appendChild(v)}
+  var v=document.createElement("video");v.className="hb";["muted","autoplay","loop","playsinline","webkit-playsinline"].forEach(function(a){v.setAttribute(a,"")});
+  v.muted=true;v.defaultMuted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.controls=false;v.poster="/banner.jpg?v=2";v.preload="auto";v.style.display="none";
+  /* show the video only once it is really playing; until then the banner picture stays (no ugly play button) */
+  function shown(){v.style.display="block";bi.style.display="none"}
+  function tryPlay(){var q;try{q=v.play()}catch(e){return}if(q&&q.then)q.then(shown).catch(function(){})}
+  v.onplaying=shown;v.oncanplay=tryPlay;v.onloadeddata=tryPlay;v._tp=tryPlay;window.__bv=v;
+  if(!window.__bvL){window.__bvL=1;  /* if the phone blocks autoplay (e.g. Low Power Mode) start on the first tap / when the app comes back */
+   ["touchend","click"].forEach(function(ev){document.addEventListener(ev,function(){var x=window.__bv;if(x&&x.paused&&x._tp)x._tp()},{passive:true})});
+   document.addEventListener("visibilitychange",function(){var x=window.__bv;if(!document.hidden&&x&&x.paused&&x._tp)x._tp()})}
+  v.src="/banner.mp4?v=2";w.appendChild(v)}
  var c=el("div","card top hero");var im=el("img","lg");im.src="/logo.png?v=2";im.alt="";im.onerror=function(){this.style.display="none"};c.appendChild(im);
  var g=el("div","grow");g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
  var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
