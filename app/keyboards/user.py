@@ -6,7 +6,6 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
-    WebAppInfo,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -31,8 +30,11 @@ _MENU_STYLE = {
 }
 
 
-# One-tap Shop Mini App button shown on top of the main menu (only when WEBAPP_URL is set).
+# Shop Mini App button shown on top of the main menu (only when WEBAPP_URL is set).
+# It is a normal text button; handlers/start.py answers it with the same "Open shop"
+# button as /app, so the Mini App opens signed-in and ordering works.
 _SHOP_BUTTON_TEXT = {"km": "🛍 ហាង App", "en": "🛍 Open Shop"}
+SHOP_BUTTON_TEXTS = frozenset(_SHOP_BUTTON_TEXT.values())
 
 
 def main_menu(lang: str) -> ReplyKeyboardMarkup:
@@ -45,7 +47,6 @@ def main_menu(lang: str) -> ReplyKeyboardMarkup:
     if webapp_url:
         rows.insert(0, [KeyboardButton(
             text=_SHOP_BUTTON_TEXT.get(lang, _SHOP_BUTTON_TEXT["en"]),
-            web_app=WebAppInfo(url=webapp_url),
             style="success",
         )])
     return ReplyKeyboardMarkup(
