@@ -1,9 +1,12 @@
 """Buttons that customers see."""
+import os
+
 from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
+    WebAppInfo,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -28,13 +31,25 @@ _MENU_STYLE = {
 }
 
 
+# One-tap Shop Mini App button shown on top of the main menu (only when WEBAPP_URL is set).
+_SHOP_BUTTON_TEXT = {"km": "🛍 ហាង App", "en": "🛍 Open Shop"}
+
+
 def main_menu(lang: str) -> ReplyKeyboardMarkup:
+    rows = [
+        [KeyboardButton(text=t(lang, f"menu_{key}"), style=_MENU_STYLE.get(key))
+         for key in row]
+        for row in _MENU_ROWS
+    ]
+    webapp_url = os.getenv("WEBAPP_URL", "").strip().rstrip("/")
+    if webapp_url:
+        rows.insert(0, [KeyboardButton(
+            text=_SHOP_BUTTON_TEXT.get(lang, _SHOP_BUTTON_TEXT["en"]),
+            web_app=WebAppInfo(url=webapp_url),
+            style="success",
+        )])
     return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text=t(lang, f"menu_{key}"), style=_MENU_STYLE.get(key))
-             for key in row]
-            for row in _MENU_ROWS
-        ],
+        keyboard=rows,
         resize_keyboard=True,
         input_field_placeholder="DIAMOND ZS 👑",
     )
