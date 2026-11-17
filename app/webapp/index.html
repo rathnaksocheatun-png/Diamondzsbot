@@ -237,9 +237,6 @@ body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transpar
 .wallet{background:linear-gradient(135deg,rgba(255,255,255,.5),rgba(255,255,255,.2)) padding-box,url(/bill.jpg?v=1) 40% 50%/cover no-repeat padding-box,linear-gradient(135deg,#fff,rgba(255,255,255,.45),#bfe9ff) border-box;background-color:transparent;border:1px solid transparent;min-height:132px}
 .wallet .gl{display:inline-block;padding:3px 12px;border-radius:999px;background:rgba(255,255,255,.62);color:#0b2f8a;text-shadow:none;letter-spacing:1px}
 .wallet .big{display:inline-block;margin-top:6px;padding:2px 14px;border-radius:14px;background:rgba(255,255,255,.62);color:#0a2a7a;text-shadow:0 1px 0 #fff;font-size:34px}
-
-/* ---- balance amount: left-aligned, 3D gold ---- */
-.wallet .big{margin-top:0;color:var(--gd);text-shadow:1px 1px 0 #eab64c,2px 2px 0 #d6a540,3px 3px 0 #c29434,4px 4px 0 #ae8428,5px 5px 0 #9a741c,6px 7px 10px rgba(0,0,0,.5)}
 </style></head><body><div id="shade"></div><div id="glint"></div>
 <div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity="1" stroke-width="2" stroke-linejoin="round" fill-opacity=".48"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
 <g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
@@ -247,7 +244,7 @@ body{background:radial-gradient(60% 30% at 20% 4%,rgba(255,255,255,.75),transpar
 <script>
 (function(){
 var tg=window.Telegram&&window.Telegram.WebApp;if(tg){try{tg.ready();tg.expand()}catch(e){}}
-var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wallet:["កាបូប","Wallet"],orders:["Order","Orders"],profile:["ប្រវត្តិរូប","Profile"],
+var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wallet:["កាបូប","Wallet"],orders:["ប្រវិត្តបញ្ជាទិញ","Orders"],profile:["ប្រវត្តិរូប","Profile"],
  deposit:["ដាក់ប្រាក់","Deposit"],bal:["សមតុល្យ","Balance"],games:["ប្រភេទហ្គេម","Our Games"],hot:["កញ្ចប់ដែលលក់ដាច់បំផុត","Hot Packages"],
  buy:["ទិញ","Buy"],pid:["Player ID","Player ID"],sid:["Zone / Server ID","Zone / Server ID"],close:["បិទ","Close"],back:["← ត្រឡប់","← Back"],
  warn:["⚠️ សូមពិនិត្យ ID ឱ្យបានច្បាស់។ ID ខុសអាចធ្វើឱ្យយឺត ឬបរាជ័យ។","⚠️ Please double-check the ID. A wrong ID can delay or fail delivery."],
@@ -261,9 +258,7 @@ var S={home:["ទំព័រដើម","Home"],store:["ហាង","Store"],wall
  tag:["តម្លៃទាបបំផុតសម្រាប់អ្នក","Gaming Top-Up Store"],bn:["សូមបើកតាម Telegram ដើម្បីមើលផ្នែកនេះ។","Open this from Telegram to see this section."],
  ob:["បើក bot ក្នុង Telegram","Open the bot in Telegram"],empty:["មិនទាន់មានផលិតផលទេ។","No packages yet."],
  err:["មិនអាចទាញទិន្នន័យបានទេ។","Could not load the shop."],retry:["ព្យាយាមម្តងទៀត","Try again"],
- about:["Diamond ZS · Copyright© 2026 Nov
-  
-រក្សាសិទ្ធដោយ @zick $iik","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយ! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ សូមបង្កើតថ្មី។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"],guide:["របៀបប្រើ","How to use"],guideStop:["ឈប់","Stop"],guideErr:["មិនអាចចាក់សំឡេងបាន។","Could not play the audio."],abc:["ID មានអក្សរ? ប្តូរទៅ ABC","ID has letters? Switch to ABC"],num:["ប្តូរត្រឡប់ទៅលេខ (123)","Back to numbers (123)"]};
+ about:["Diamond ZS · ទិញពេជ្រលឿន និងសុវត្ថិភាព","Diamond ZS · fast and safe top-ups"],lg:["English","ខ្មែរ"],amount:["ចំនួនទឹកប្រាក់ (USD)","Amount (USD)"],makeqr:["បង្កើត QR","Create QR"],scan:["ស្កេន KHQR ដោយកម្មវិធីធនាគារ ដើម្បីបង់ប្រាក់។","Scan the KHQR with your bank app to pay."],paid:["✅ ទទួលបានប្រាក់ហើយ! សមតុល្យត្រូវបានបន្ថែម។","✅ Payment received! Balance updated."],expired:["QR ផុតកំណត់ ឬត្រូវបានបិទ។ សូមបង្កើតថ្មី។","The QR expired or was closed. Create a new one."],cancelq:["បោះបង់","Cancel"],guide:["របៀបប្រើ","How to use"],guideStop:["ឈប់","Stop"],guideErr:["មិនអាចចាក់សំឡេងបាន។","Could not play the audio."],abc:["ID មានអក្សរ? ប្តូរទៅ ABC","ID has letters? Switch to ABC"],num:["ប្តូរត្រឡប់ទៅលេខ (123)","Back to numbers (123)"]};
 var E={insufficient:["សមតុល្យមិនគ្រប់។ សូមដាក់ប្រាក់ក្នុង bot រួចត្រឡប់មកវិញ។","Not enough balance. Top up in the bot, then come back."],
  duplicate:["មាន order ដូចគ្នានេះកំពុងដំណើរការរួចហើយ។","The same order is already in progress."],unavailable:["កញ្ចប់នេះមិនអាចទិញបានទេ។","This package is not available."],
  invalid_player_id:["Player ID មិនត្រឹមត្រូវ។","Invalid Player ID."],invalid_server_id:["Zone/Server ID មិនត្រឹមត្រូវ។","Invalid Zone/Server ID."],
@@ -276,7 +271,7 @@ function money(c){return"$"+(c/100).toFixed(2)}
 function can(){return st.signed&&st.bal!==null}
 var sheet=null,timers=[];function stopT(){timers.forEach(clearInterval);timers=[]}
 function shut(){stopT();if(sheet){sheet.remove();sheet=null}}
-function api(path,body){return fetch(path,{method:"POST",cache:"no-store",headers:{"X-Init-Data":tg.initData,"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json()})}
+function api(path,body){return fetch(path,{method:"POST",cache:"no-store",headers:(tg&&tg.initData)?{"X-Init-Data":tg.initData,"Content-Type":"application/json"}:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json()})}
 function mk(){shut();sheet=el("div","ov");var b=el("div","sheet");sheet.appendChild(b);sheet.onclick=function(e){if(e.target===sheet)shut()};document.body.appendChild(sheet);return b}
 function notice(text){var b=mk();b.appendChild(el("div","msg",text));var c=el("button","btn w",T("close"));c.onclick=function(){shut();if(tg&&st.signed)tg.close()};b.appendChild(c)}
 var AC=null;function beep(f,d){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();var t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;
@@ -295,7 +290,7 @@ function buy(p,g){var b=mk();b.appendChild(el("h3","",p.emoji+" "+p.name));b.app
  function say(x,c){m.textContent=x;m.className="msg "+(c||"")}
  go.onclick=function(){if(!pid.value.trim()){say(E.invalid_player_id[st.lang],"err");return}
   go.disabled=true;say("…");
-  fetch("/api/order",{method:"POST",cache:"no-store",headers:{"X-Init-Data":tg.initData,"Content-Type":"application/json"},
+  fetch("/api/order",{method:"POST",cache:"no-store",headers:(tg&&tg.initData)?{"X-Init-Data":tg.initData,"Content-Type":"application/json"}:{"Content-Type":"application/json"},
    body:JSON.stringify({product_id:p.id,player_id:pid.value.trim(),server_id:sid.value.trim()})})
   .then(function(r){return r.json()}).then(function(d){
    if(d.ok){if(d.balance_cents!=null)st.bal=d.balance_cents;st.acct=null;go.remove();pid.disabled=sid.disabled=true;say(T("done")+d.order_id+"\n"+T("doneSub"),"ok");draw();chime();
@@ -306,7 +301,7 @@ function showQR(b,d){b.textContent="";var im=el("img");im.src=d.qr;im.alt="KHQR"
  b.appendChild(el("div","note",T("scan")));var cd=el("div","big","");cd.style.textAlign="center";b.appendChild(cd);var m=el("div","msg");b.appendChild(m);var t0=Date.now();
  function tick(){var s=Math.max(0,d.expires_in-Math.floor((Date.now()-t0)/1000));cd.textContent=Math.floor(s/60)+":"+("0"+s%60).slice(-2);if(s<=0){stopT();m.textContent=T("expired");m.className="msg err"}}
  tick();timers.push(setInterval(tick,1000));
- timers.push(setInterval(function(){fetch("/api/deposit_status?id="+d.id,{headers:{"X-Init-Data":tg.initData},cache:"no-store"}).then(function(r){return r.json()}).then(function(x){
+ timers.push(setInterval(function(){fetch("/api/deposit_status?id="+d.id,{headers:(tg&&tg.initData)?{"X-Init-Data":tg.initData}:{},cache:"no-store"}).then(function(r){return r.json()}).then(function(x){
   if(x.status==="approved"){stopT();st.bal=x.balance_cents;st.acct=null;m.textContent=T("paid");m.className="msg ok";draw();chime();try{tg.HapticFeedback.notificationOccurred("success")}catch(e){}}
   else if(x.status==="rejected"){stopT();m.textContent=T("expired");m.className="msg err"}}).catch(function(){})},4000));
  var c=el("button","btn alt w",T("cancelq"));c.onclick=function(){stopT();api("/api/deposit_cancel",{id:d.id}).then(shut,shut)};b.appendChild(c)}
@@ -333,7 +328,7 @@ function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src
  var g=el("div","grow");g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
  var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
  var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);w.appendChild(c);return w}
-function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
+function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","sub gl",T("bal")));g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
  if(st.signed){var b=el("button","btn gold",T("deposit"));b.onclick=function(){if(st.pay)depositSheet();else notice(T("dep"))};c.appendChild(b)}return c}
 function gate(box){if(st.signed)return false;box.appendChild(el("div","note",T("bn")));
  if(st.bot){var a=el("a","btn w",T("ob"));a.href="https://t.me/"+encodeURIComponent(st.bot);a.target="_blank";a.style.cssText="display:block;text-align:center;text-decoration:none";box.appendChild(a)}return true}
@@ -373,14 +368,14 @@ function profile(box){if(gate(box))return;var a=st.acct||{};var c=el("div","card
  var s=el("div","card row");[[T("tord"),a.total_orders||0],[T("tsp"),money(a.total_spent_cents||0)]].forEach(function(p){var d=el("div","grow");d.appendChild(el("div","sub",p[0]));d.appendChild(el("div","nm",String(p[1])));s.appendChild(d)});box.appendChild(s);
  var l=el("div","card row");l.appendChild(el("div","grow",T("lang")));var b=el("button","btn s alt",T("lg"));b.onclick=function(){st.lang=1-st.lang;draw()};l.appendChild(b);box.appendChild(l);
  box.appendChild(el("div","note",T("about")))}
-var TABS=[["home","🏠"],["store","🛍"],["wallet","👛"],["orders","🧾"],["profile","👤"]];
+var TABS=[["home","🏠"],["store","🛍"],["wallet","👛"],["orders","🧾"],["profile","👽"]];
 function draw(){var app=document.getElementById("app");app.textContent="";document.documentElement.lang=st.lang?"en":"km";
  if(st.failed){app.appendChild(el("div","note",T("err")));var r=el("button","btn w",T("retry"));r.onclick=load;app.appendChild(r)}
  else{app.appendChild(head());({home:home,store:store,wallet:wallet,orders:orders,profile:profile})[st.tab](app)}
  var nav=document.getElementById("nav");nav.textContent="";
  TABS.forEach(function(t){var b=el("button",st.tab===t[0]?"on":"");b.appendChild(el("b","",t[1]));b.appendChild(document.createTextNode(T(t[0])));
   b.onclick=function(){st.tab=t[0];if(t[0]!=="store")st.game=null;draw();window.scrollTo(0,0);if(st.signed&&!st.acct)account()};nav.appendChild(b)})}
-function account(){fetch("/api/account",{headers:{"X-Init-Data":tg.initData},cache:"no-store"}).then(function(r){return r.json()}).then(function(d){
+function account(){fetch("/api/account",{headers:(tg&&tg.initData)?{"X-Init-Data":tg.initData}:{},cache:"no-store"}).then(function(r){return r.json()}).then(function(d){
  if(d&&d.tg_id){st.acct=d;if(d.balance_cents!=null)st.bal=d.balance_cents;draw()}}).catch(function(){})}
 function load(){st.failed=false;document.getElementById("app").textContent="…";
  fetch("/api/catalog",{headers:(tg&&tg.initData)?{"X-Init-Data":tg.initData}:{},cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
