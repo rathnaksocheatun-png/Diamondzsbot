@@ -87,6 +87,13 @@ async def _guide(request: web.Request) -> web.StreamResponse:
     raise web.HTTPNotFound()
 
 
+async def _bill(request: web.Request) -> web.StreamResponse:
+    path = HERE / "bill.jpg"
+    if not path.is_file():
+        raise web.HTTPNotFound()
+    return web.FileResponse(path, headers={"Cache-Control": "public, max-age=86400"})
+
+
 async def _health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
 
@@ -409,6 +416,7 @@ async def start_webapp(db, bot_token: str, port: int, bot_username: str = "",
         web.get("/", _page),
         web.get("/logo.png", _logo),
         web.get("/banner.jpg", _banner),
+        web.get("/bill.jpg", _bill),
         web.get("/guide/{lang}", _guide),
         web.get("/banner.mp4", _banner_video),
         web.get("/health", _health),
