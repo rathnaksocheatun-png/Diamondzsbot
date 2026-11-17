@@ -259,11 +259,7 @@ var E={insufficient:["សមតុល្យមិនគ្រប់។ សូម
  invalid_player_id:["Player ID មិនត្រឹមត្រូវ។","Invalid Player ID."],invalid_server_id:["Zone/Server ID មិនត្រឹមត្រូវ។","Invalid Zone/Server ID."],
  no_user:["សូមចុច /start ក្នុង bot មុន។","Please send /start to the bot first."],rate_limited:["ព្យាយាមញឹកញាប់ពេក សូមរង់ចាំ។","Too many tries. Please wait."],
  bad_amount:["ចំនួនទឹកប្រាក់ត្រូវនៅចន្លោះ $0.50 និង $500។","Amount must be between $0.50 and $500."],deposit_pending:["មាន QR មួយកំពុងរង់ចាំ។ សូមរង់ចាំ ៣ នាទី ឬបោះបង់ក្នុង bot។","A QR is already waiting. Wait 3 minutes or cancel it in the bot."],pay_error:["ប្រព័ន្ធទូទាត់មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Payment system problem. Try again."],no_pay:["ការដាក់ប្រាក់មិនទាន់បើកទេ។","Deposits are not available right now."],busy:["កំពុងដំណើរការ សូមរង់ចាំ។","Still working. Please wait."],error:["មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Something went wrong. Try again."]};
-<<<<<<< main
 var st={lang:0,games:[],bot:"",signed:false,bal:null,pay:false,banner:"",hot:[],gd:{km:false,en:false},tab:"home",game:null,acct:null,filter:"all",failed:false};
-=======
-var st={lang:0,games:[],bot:"",signed:false,bal:null,pay:false,banner:"",hot:[],tab:"home",game:null,acct:null,filter:"all",failed:false};
->>>>>>> origin/main
 function T(k){var v=S[k];return v?v[st.lang]:k}
 function el(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x!==undefined)n.textContent=x;return n}
 function money(c){return"$"+(c/100).toFixed(2)}
@@ -339,7 +335,6 @@ function home(box){var u=el("div","card top");var a=el("div","av",((st.acct&&st.
  box.appendChild(el("h3","",T("hot")));var IDS=st.hot.length?st.hot.slice(0,8):[34,26,38];var all=[];st.games.forEach(function(g){g.products.forEach(function(p){all.push([p,g])})});IDS.forEach(function(i){var f=all.filter(function(x){return Number(x[0].id)===i})[0];if(f)box.appendChild(pkg(f[0],f[1]))});return;
 var HOT=["Weekly Pass","Weekly Lite","Monthly Pass"];var all=[];st.games.forEach(function(g){g.products.forEach(function(p){all.push([p,g])})});HOT.forEach(function(nm){var f=all.filter(function(x){return x[0].name.trim().toLowerCase()===nm.toLowerCase()})[0];if(f)box.appendChild(pkg(f[0],f[1]))});return;
 (function(g){g.products.slice(0,2).forEach(function(p){if(n++<4)box.appendChild(pkg(p,g))})})}
-<<<<<<< main
 var gaud=null;
 function playBtn(){if(!st.gd.km&&!st.gd.en)return el("span");
  var on=gaud&&!gaud.paused;var b=el("button","btn s gold play",(on?"⏸ ":"▶ ")+T(on?"guideStop":"guide"));
@@ -352,12 +347,6 @@ function store(box){if(!st.games.length){box.appendChild(el("div","note",T("empt
  var g=st.games.filter(function(x){return x.code===st.game})[0];
  if(!g){var gr=el("div","gg");st.games.forEach(function(x){gr.appendChild(gameTile(x))});box.appendChild(gr);return}
  var b=el("button","btn s alt back",T("back"));b.onclick=function(){st.game=null;draw()};var rw=el("div","row");rw.appendChild(b);rw.appendChild(el("div","grow"));rw.appendChild(playBtn());box.appendChild(rw);var gh=el("h3","gt");gh.appendChild(el("span","",g.emoji));gh.appendChild(el("span","tx",g.name));box.appendChild(gh);
-=======
-function store(box){if(!st.games.length){box.appendChild(el("div","note",T("empty")));return}
- var g=st.games.filter(function(x){return x.code===st.game})[0];
- if(!g){var gr=el("div","gg");st.games.forEach(function(x){gr.appendChild(gameTile(x))});box.appendChild(gr);return}
- var b=el("button","btn s alt back",T("back"));b.onclick=function(){st.game=null;draw()};box.appendChild(b);var gh=el("h3","gt");gh.appendChild(el("span","",g.emoji));gh.appendChild(el("span","tx",g.name));box.appendChild(gh);
->>>>>>> origin/main
  g.products.forEach(function(p){box.appendChild(pkg(p,g))})}
 function when(s){return(s||"").slice(0,16)}
 function wallet(box){if(gate(box))return;box.appendChild(balCard());box.appendChild(el("h3","",T("hist")));var t=(st.acct&&st.acct.transactions)||[];
