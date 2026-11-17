@@ -65,10 +65,22 @@ async def cmd_gameimg_off(message: Message, db: Database):
 
 @admin.message(Command("gamecodes"))
 async def cmd_gamecodes(message: Message, db: Database):
-    """List every game with its code (the code is what /gameimg needs)."""
+    """/gamecodes  (all games)   |   /gamecodes pool  (search by name or code)"""
+    q = (message.text or "").partition(" ")[2].strip().lower()
     games = await repo.list_games(db, only_active=False)
-    lines = [f"{g.get('emoji') or '🎮'} {g['name']} → <code>{g['code']}</code>" for g in games]
-    await message.answer("\n".join(lines)[:4000] or "No games yet.")
+    lines = [f"{g.get('emoji') or '🎮'} {g['name']} → <code>{g['code']}</code>" for g in games
+             if not q or q in g["name"].lower() or q in g["code"].lower()]
+    if not lines:
+        await message.answer("No game found." if q else "No games yet.")
+        return
+    chunk = ""
+    for line in lines:                      # Telegram limits one message, so send in parts
+        if len(chunk) + len(line) + 1 > 3500:
+            await message.answer(chunk)
+            chunk = ""
+        chunk += line + "\n"
+    if chunk:
+        await message.answer(chunk)
 
 
 @admin.message(Command("pkgs"))
