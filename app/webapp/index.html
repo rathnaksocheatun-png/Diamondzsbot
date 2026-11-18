@@ -328,11 +328,11 @@ function depositSheet(){var b=mk();b.appendChild(el("h3","",T("deposit")));var p
  go.onclick=function(){var c=Math.round(parseFloat(amt.value)*100);if(!(c>0)){bad("bad_amount");return}go.disabled=true;m.textContent="…";m.className="msg";
   api("/api/deposit",{amount_cents:c}).then(function(d){if(d.ok)showQR(b,d);else bad(d.error)}).catch(function(){bad("error")})}}
 function pkg(p,g){var c=el("div","card pk row");
- if(p.img){var im=el("img");im.src="/pimg/"+p.id;im.alt="";im.style.cssText="width:46px;height:46px;border-radius:10px;object-fit:cover;flex:0 0 auto;box-shadow:0 0 10px #1d6bff88";c.appendChild(im);c.appendChild(el("div","pn",p.name))}
+ if(p.img){var im=el("img");im.src="/pimg/"+p.id+"?v="+(p.imgv||"");im.alt="";im.style.cssText="width:46px;height:46px;border-radius:10px;object-fit:cover;flex:0 0 auto;box-shadow:0 0 10px #1d6bff88";c.appendChild(im);c.appendChild(el("div","pn",p.name))}
  else c.appendChild(el("div","pn",p.emoji+" "+p.name));c.appendChild(el("div","pp",money(p.price_cents)));
  if(can()){var b=el("button","btn s",T("buy"));b.onclick=function(){buy(p,g)};c.appendChild(b)}return c}
 function gameTile(g,open){var t=el("div","card tile");
- if(g.img){t.style.cssText="padding:0;overflow:hidden;position:relative;aspect-ratio:4/3";var im=el("img");im.src="/img/"+encodeURIComponent(g.code);im.alt="";im.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover";t.appendChild(im);
+ if(g.img){t.style.cssText="padding:0;overflow:hidden;position:relative;aspect-ratio:4/3";var im=el("img");im.src="/img/"+encodeURIComponent(g.code)+"?v="+(g.imgv||"");im.alt="";im.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover";t.appendChild(im);
   var sp=el("span","",g.name);sp.style.cssText="position:absolute;left:0;right:0;bottom:0;padding:20px 6px 7px;background:linear-gradient(transparent,#000d);font-weight:700;font-size:13px;text-shadow:0 0 6px #000";t.appendChild(sp)}
  else{t.appendChild(el("b","",g.emoji));t.appendChild(el("span","",g.name))}
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
