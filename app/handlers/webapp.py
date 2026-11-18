@@ -21,7 +21,8 @@ async def cmd_app(message: Message, webapp_url: str = ""):
         await message.answer("🛍 The shop app is not ready yet.\nហាង app មិនទាន់ត្រៀមរួចទេ។")
         return
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="🛍 Open shop / បើកហាង", web_app=WebAppInfo(url=webapp_url)),
+        InlineKeyboardButton(text="🛍 Open shop / បើកហាង", web_app=WebAppInfo(url=webapp_url),
+                             style="success"),
     ]])
     await message.answer("💎 <b>Diamond ZS</b>", reply_markup=keyboard)
 
