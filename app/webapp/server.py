@@ -4,6 +4,7 @@ Phase 1: customers can browse games, packages and prices. Nothing here changes
 data or touches money.
 """
 import asyncio
+import hashlib
 import json
 import logging
 import time
@@ -98,6 +99,12 @@ async def _health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
 
 
+def _ver(file_id) -> str:
+    """Short version tag of a picture. It changes whenever the admin sets a new picture,
+    so the Mini App asks for a fresh image instead of showing the cached old one."""
+    return hashlib.md5(file_id.encode()).hexdigest()[:8] if file_id else ""
+
+
 CACHE_SECONDS = 10      # the shop list is rebuilt at most once every 10 seconds
 
 
@@ -133,9 +140,11 @@ async def _games(app: web.Application) -> list:
             "emoji": game.get("emoji") or "🎮",
             "needs_server": bool(game.get("needs_server_id")),
             "img": game["code"] in imgs,
+            "imgv": _ver(imgs.get(game["code"])),
             "products": [
                 {"id": p["id"], "name": p["name"], "price_cents": p["price_cents"],
-                 "emoji": p.get("emoji") or "💎", "img": str(p["id"]) in pimgs}
+                 "emoji": p.get("emoji") or "💎", "img": str(p["id"]) in pimgs,
+                 "imgv": _ver(pimgs.get(str(p["id"])))}
                 for p in products
             ],
         })
@@ -222,6 +231,7 @@ async def _send_file(app, file_id) -> web.Response:
         try:
             app["imgbytes"][file_id] = (await app["bot"].download(file_id)).read()
         except Exception:
+            log.exception("Could not download Mini App picture from Telegram")
             raise web.HTTPNotFound()
     return web.Response(body=app["imgbytes"][file_id], content_type="image/jpeg",
                         headers={"Cache-Control": "public, max-age=3600"})
