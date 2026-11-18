@@ -332,8 +332,8 @@ function pkg(p,g){var c=el("div","card pk row");
  else c.appendChild(el("div","pn",p.emoji+" "+p.name));c.appendChild(el("div","pp",money(p.price_cents)));
  if(can()){var b=el("button","btn s",T("buy"));b.onclick=function(){buy(p,g)};c.appendChild(b)}return c}
 function gameTile(g,open){var t=el("div","card tile");
- if(g.img){t.style.cssText="padding:0;overflow:hidden;position:relative;aspect-ratio:4/3";var im=el("img");im.src="/img/"+encodeURIComponent(g.code)+"?v="+(g.imgv||"");im.alt="";im.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover";t.appendChild(im);
-  var sp=el("span","",g.name);sp.style.cssText="position:absolute;left:0;right:0;bottom:0;padding:20px 6px 7px;background:linear-gradient(transparent,#000d);font-weight:700;font-size:13px;text-shadow:0 0 6px #000";t.appendChild(sp)}
+ if(g.img){t.style.cssText="padding:0;overflow:hidden;position:relative";var im=el("img");im.src="/img/"+encodeURIComponent(g.code)+"?v="+(g.imgv||"");im.alt="";im.style.cssText="display:block;width:100%;height:auto";t.appendChild(im);
+  var sp=el("span","",g.name);sp.style.cssText="position:absolute;left:0;right:0;bottom:0;padding:16px 6px 5px;background:linear-gradient(transparent,#000d);font-weight:700;font-size:11px;line-height:1.2;text-shadow:0 0 6px #000";t.appendChild(sp)}
  else{t.appendChild(el("b","",g.emoji));t.appendChild(el("span","",g.name))}
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
 function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg?v=2";bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
