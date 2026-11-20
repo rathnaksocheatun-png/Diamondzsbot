@@ -345,7 +345,7 @@ function gameTile(g,open){var t=el("div","card tile");
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
 function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg?v="+st.bv;bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
   var v=document.createElement("video");v.className="hb";["muted","autoplay","loop","playsinline","webkit-playsinline"].forEach(function(a){v.setAttribute(a,"")});
-  v.muted=true;v.defaultMuted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.controls=false;v.poster="/banner.jpg?v="+st.bv;v.preload="auto";v.style.display="none";
+  v.muted=true;v.defaultMuted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.controls=false;v.poster="/banner.jpg?v="+st.bv;v.preload="auto";var HID="position:fixed;left:0;top:0;width:4px;height:4px;opacity:.01;pointer-events:none;z-index:-1";v.style.cssText=HID;
   /* show the video only once it is really playing; until then the banner picture stays (no ugly play button) */
   /* the banner video has a see-through background: its picture (left half) and its see-through mask (right half) are put together on a canvas */
   var cv=document.createElement("canvas");cv.className="hb";cv.width=720;cv.height=896;cv.style.display="none";w.appendChild(cv);
@@ -363,11 +363,11 @@ function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src
     gl.viewport(0,0,720,896);
     hbR=function(){gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,v);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}}
   }catch(e){hbR=null}
-  function shown(){if(v.videoWidth!==1440){v.style.display="block";bi.style.display="none";return}  /* an ordinary (old) banner video is simply shown as it is */
+  function shown(){if(v.videoWidth!==1440){v.style.cssText="";bi.style.display="none";return}  /* an ordinary (old) banner video is simply shown as it is */
    if(!hbR)return;try{hbR()}catch(e){return}cv.style.display="block";bi.style.display="none"}
   var hbT=-1;function lp(){if(!cv.isConnected)return;if(hbR&&v.videoWidth===1440&&v.readyState>=2&&v.currentTime!==hbT&&!document.hidden){hbT=v.currentTime;try{hbR()}catch(e){}}requestAnimationFrame(lp)}requestAnimationFrame(lp);
   function tryPlay(){var q;try{q=v.play()}catch(e){return}if(q&&q.then)q.then(shown).catch(function(){})}
-  v.onplaying=shown;v.oncanplay=tryPlay;v.onloadeddata=tryPlay;v._tp=tryPlay;window.__bv=v;
+  v.onplaying=shown;v.oncanplay=tryPlay;v.onloadeddata=tryPlay;v.onloadedmetadata=tryPlay;v._tp=tryPlay;window.__bv=v;
   if(!window.__bvL){window.__bvL=1;  /* if the phone blocks autoplay (e.g. Low Power Mode) start on the first tap / when the app comes back */
    ["touchend","click"].forEach(function(ev){document.addEventListener(ev,function(){var x=window.__bv;if(x&&x.paused&&x._tp)x._tp()},{passive:true})});
    document.addEventListener("visibilitychange",function(){var x=window.__bv;if(!document.hidden&&x&&x.paused&&x._tp)x._tp()})}
