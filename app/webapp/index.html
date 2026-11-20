@@ -365,7 +365,7 @@ function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src
   }catch(e){hbR=null}
   function shown(){if(v.videoWidth!==1440){v.style.display="block";bi.style.display="none";return}  /* an ordinary (old) banner video is simply shown as it is */
    if(!hbR)return;try{hbR()}catch(e){return}cv.style.display="block";bi.style.display="none"}
-  var hbT=-1;(function lp(){if(!cv.isConnected)return;if(hbR&&v.videoWidth===1440&&v.readyState>=2&&v.currentTime!==hbT&&!document.hidden){hbT=v.currentTime;try{hbR()}catch(e){}}requestAnimationFrame(lp)})();
+  var hbT=-1;function lp(){if(!cv.isConnected)return;if(hbR&&v.videoWidth===1440&&v.readyState>=2&&v.currentTime!==hbT&&!document.hidden){hbT=v.currentTime;try{hbR()}catch(e){}}requestAnimationFrame(lp)}requestAnimationFrame(lp);
   function tryPlay(){var q;try{q=v.play()}catch(e){return}if(q&&q.then)q.then(shown).catch(function(){})}
   v.onplaying=shown;v.oncanplay=tryPlay;v.onloadeddata=tryPlay;v._tp=tryPlay;window.__bv=v;
   if(!window.__bvL){window.__bvL=1;  /* if the phone blocks autoplay (e.g. Low Power Mode) start on the first tap / when the app comes back */
