@@ -343,7 +343,7 @@ function gameTile(g,open){var t=el("div","card tile");
   var sp=el("span","",g.name);sp.style.cssText="position:absolute;left:0;right:0;bottom:0;padding:16px 6px 5px;background:linear-gradient(transparent,#000d);font-weight:700;font-size:11px;line-height:1.2;text-shadow:0 0 6px #000";t.appendChild(sp)}
  else{t.appendChild(el("b","",g.emoji));t.appendChild(el("span","",g.name))}
  t.onclick=function(){st.tab="store";st.game=g.code;draw();window.scrollTo(0,0)};return t}
-function head(){var w=el("div");if(st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg?v="+st.bv;bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
+function head(){var w=el("div");if(0&&st.tab==="home"){var bi=el("img","hb");bi.src="/banner.jpg?v="+st.bv;bi.alt="Diamond ZS";bi.onerror=function(){this.style.display="none"};w.appendChild(bi);
   var v=document.createElement("video");v.className="hb";["muted","autoplay","loop","playsinline","webkit-playsinline"].forEach(function(a){v.setAttribute(a,"")});
   v.muted=true;v.defaultMuted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.controls=false;v.poster="/banner.jpg?v="+st.bv;v.preload="auto";var HID="position:fixed;left:0;top:0;width:4px;height:4px;opacity:.01;pointer-events:none;z-index:-1";v.style.cssText=HID;
   /* show the video only once it is really playing; until then the banner picture stays (no ugly play button) */
