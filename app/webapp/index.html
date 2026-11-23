@@ -516,8 +516,7 @@ function load(tries){tries=tries||0;st.failed=false;var app=document.getElementB
   else["km","en"].forEach(function(l){fetch("/guide/"+l,{method:"HEAD",cache:"no-store"}).then(function(r){if(r.ok&&!st.gd[l]){st.gd[l]=true;if(st.tab==="store")draw()}}).catch(function(){})});
   st.ready=true;draw();if(st.signed&&!st.acct)account()})
  .catch(function(){if(tries<1){setTimeout(function(){load(tries+1)},1200);return}st.failed=true;st.ready=true;draw()})}
-(function(){var d=document.createElement("div");d.id="snow";for(var i=0;i<10;i++){var x=document.createElement("span");x.textContent="💎";
- x.style.cssText="left:"+(Math.random()*100)+"%;font-size:"+(10+Math.random()*9)+"px;opacity:"+(.45+Math.random()*.4)+";animation-duration:"+(11+Math.random()*9)+"s,"+(3+Math.random()*3)+"s;animation-delay:-"+(Math.random()*18)+"s,0s";d.appendChild(x)}document.body.appendChild(d)})();
+/* the falling diamonds (snow) were removed on request */
 (function(){var big=document.querySelector("#gembig svg");if(!big)return;for(var i=1;i<=5;i++){var d=document.createElement("div");d.className="gs g"+i;d.setAttribute("aria-hidden","true");d.appendChild(big.cloneNode(true));document.body.appendChild(d)}})();
 document.addEventListener("pointerdown",function(e){var b=e.target.closest&&e.target.closest("button,.tile,.card.buy");if(b){try{tg.HapticFeedback.impactOccurred("light")}catch(x){}}},{passive:true});
 (function(){var h=document.documentElement,t=0;window.addEventListener("scroll",function(){if(!t)h.classList.add("sc");clearTimeout(t);t=setTimeout(function(){t=0;h.classList.remove("sc")},140)},{passive:true})})();
