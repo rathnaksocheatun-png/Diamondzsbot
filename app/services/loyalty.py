@@ -50,6 +50,34 @@ async def get_levels(db: Database) -> list:
     return list(DEFAULT_LEVELS)
 
 
+async def get_level_bonuses(db: Database, levels: list) -> dict:
+    """{level index: bonus cents} - a one-time wallet credit when the customer first reaches that level."""
+    try:
+        raw = json.loads(await repo.get_setting(db, "level_bonus") or "{}")
+        by_name = {str(k).lower(): int(v) for k, v in raw.items()}
+    except (ValueError, TypeError, AttributeError):
+        by_name = {}
+    return {i: by_name[n.lower()] for i, (n, _) in enumerate(levels)
+            if i >= 1 and by_name.get(n.lower(), 0) > 0}
+
+
+async def sync_level_seen(db: Database) -> int:
+    """Mark every customer as 'already reached' the level they have NOW. Called when the admin
+    sets a bonus, so bonuses are only paid for levels reached AFTER that moment (no surprise
+    pay-out to customers who crossed a level long ago). Returns how many customers changed."""
+    levels = await get_levels(db)
+    rows = await db.fetchall(
+        "SELECT u.id, u.level_seen, COALESCE(SUM(o.price_cents), 0) AS s FROM users u "
+        "LEFT JOIN orders o ON o.user_id = u.id AND o.status = 'completed' GROUP BY u.id")
+    changed = 0
+    for r in rows:
+        idx = level_info(levels, r["s"])["index"]
+        if idx > r["level_seen"]:
+            await db.execute("UPDATE users SET level_seen = ? WHERE id = ?", (idx, r["id"]))
+            changed += 1
+    return changed
+
+
 def level_info(levels: list, spent_cents: int) -> dict:
     """Where the customer is now and how far the next level is."""
     idx = 0
@@ -168,11 +196,56 @@ async def reward_for_order(db: Database, order_id: int) -> Optional[dict]:
     return {"referrer_id": referrer_id, "friend_id": friend_id, "amount_cents": reward}
 
 
+async def check_level_up(db: Database, order_id: int) -> Optional[dict]:
+    """Called right after an order was completed. If the customer's total spending just crossed
+    into a higher level, remember it (once per level) so the congratulation message is sent."""
+    levels = await get_levels(db)
+    bonuses = await get_level_bonuses(db, levels)
+    bonus = 0
+    async with db.transaction() as conn:
+        cur = await conn.execute(
+            "SELECT o.user_id, u.level_seen FROM orders o JOIN users u ON u.id = o.user_id "
+            "WHERE o.id = ? AND o.status = 'completed'", (order_id,))
+        row = await cur.fetchone()
+        await cur.close()
+        if row is None:
+            return None
+        cur = await conn.execute(
+            "SELECT COALESCE(SUM(price_cents), 0) AS s FROM orders "
+            "WHERE user_id = ? AND status = 'completed'", (row["user_id"],))
+        spent = (await cur.fetchone())["s"]
+        await cur.close()
+        idx = level_info(levels, spent)["index"]
+        if idx <= row["level_seen"]:
+            return None
+        await conn.execute("UPDATE users SET level_seen = ? WHERE id = ?", (idx, row["user_id"]))
+        if idx >= 1:                                  # the first level (from $0) is not worth a message
+            # Every level crossed pays its bonus, so one big purchase pays the same total as
+            # climbing step by step (nobody is better off by splitting purchases).
+            crossed = range(row["level_seen"] + 1, idx + 1)
+            bonus = sum(bonuses.get(i, 0) for i in crossed)
+            if bonus > 0:
+                cur = await conn.execute("SELECT balance_cents FROM users WHERE id = ?", (row["user_id"],))
+                new_balance = (await cur.fetchone())["balance_cents"] + bonus
+                await cur.close()
+                await conn.execute("UPDATE users SET balance_cents = ? WHERE id = ?",
+                                   (new_balance, row["user_id"]))
+                await conn.execute(
+                    "INSERT INTO transactions (user_id, type, amount_cents, balance_after_cents, note) "
+                    "VALUES (?, 'deposit', ?, ?, ?)",
+                    (row["user_id"], bonus, new_balance, f"[level] {levels[idx][0]} bonus"))
+            await conn.execute(
+                "INSERT INTO level_ups (user_id, level_idx, level_name, bonus_cents) VALUES (?, ?, ?, ?)",
+                (row["user_id"], idx, levels[idx][0], bonus))
+    return {"user_id": row["user_id"], "level_idx": idx, "level_name": levels[idx][0], "bonus_cents": bonus}
+
+
 async def account_extras(db: Database, user: dict, bot_username: str) -> dict:
     """Level + referral numbers for the Mini App profile tab."""
     levels = await get_levels(db)
     cfg = await get_referral_config(db)
     info = level_info(levels, await spent_cents(db, user["id"]))
+    info["next_bonus_cents"] = (await get_level_bonuses(db, levels)).get(info["index"] + 1, 0)
     invited = await db.fetchone("SELECT COUNT(*) AS n FROM users WHERE referred_by = ?", (user["id"],))
     bought = await db.fetchone(
         "SELECT COUNT(DISTINCT o.user_id) AS n FROM orders o JOIN users u ON u.id = o.user_id "
@@ -200,7 +273,8 @@ async def referral_admin_stats(db: Database) -> dict:
 
 
 async def watch_referral_rewards(bot, db: Database) -> None:
-    """Background loop: send each inviter a thank-you message once their reward was paid."""
+    """Background loop: thank-you message to inviters whose reward was paid, and a
+    congratulation message to customers who reached a new membership level."""
     from app.texts import t
     from app.utils.formatting import esc, money
     from app.utils.telegram import notify_user
@@ -215,8 +289,18 @@ async def watch_referral_rewards(bot, db: Database) -> None:
                     r["language"], "referral_reward_user",
                     friend=esc(r["friend"] or "-"), amount=money(r["amount_cents"])))
                 await db.execute("UPDATE referral_rewards SET notified = 1 WHERE id = ?", (r["id"],))
+            ups = await db.fetchall(
+                "SELECT l.id, l.level_idx, l.level_name, l.bonus_cents, u.telegram_id, u.language "
+                "FROM level_ups l JOIN users u ON u.id = l.user_id WHERE l.notified = 0 "
+                "ORDER BY l.id LIMIT 20")
+            for r in ups:
+                await notify_user(bot, r["telegram_id"], t(
+                    r["language"], "level_up_bonus_user" if r["bonus_cents"] > 0 else "level_up_user",
+                    icon=LEVEL_ICONS[min(r["level_idx"], MAX_LEVELS - 1)], level=esc(r["level_name"]),
+                    amount=money(r["bonus_cents"])))
+                await db.execute("UPDATE level_ups SET notified = 1 WHERE id = ?", (r["id"],))
         except asyncio.CancelledError:
             raise
         except Exception:
-            log.exception("Could not send referral notifications")
+            log.exception("Could not send referral / level-up notifications")
         await asyncio.sleep(20)
