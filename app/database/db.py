@@ -129,6 +129,17 @@ CREATE TABLE IF NOT EXISTS referral_rewards (
     created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Membership level-ups waiting for their congratulation message.
+CREATE TABLE IF NOT EXISTS level_ups (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id),
+    level_idx  INTEGER NOT NULL,
+    level_name TEXT NOT NULL,
+    bonus_cents INTEGER NOT NULL DEFAULT 0,
+    notified   INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Premium (animated) emoji the admin set from inside the bot (/emoji).
 CREATE TABLE IF NOT EXISTS custom_emojis (
     emoji      TEXT PRIMARY KEY,
@@ -223,7 +234,9 @@ class Database:
             ("supplier_note", "TEXT"),
         ))
         # Friend referral: who invited this customer (users.id of the inviter), set once.
-        await self._add_columns("users", (("referred_by", "INTEGER"),))
+        await self._add_columns("level_ups", (("bonus_cents", "INTEGER NOT NULL DEFAULT 0"),))
+        await self._add_columns("users", (("referred_by", "INTEGER"),
+                                          ("level_seen", "INTEGER NOT NULL DEFAULT 0")))
         await self._conn.execute(
             "CREATE INDEX IF NOT EXISTS ix_users_referred_by ON users(referred_by)")
         # One gateway transaction can never be credited to two deposit requests.
