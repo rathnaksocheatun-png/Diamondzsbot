@@ -10,6 +10,10 @@
   /levels Bronze=0 Silver=20 Gold=50 Diamond=100      set the steps (dollars spent)
   /levels reset             back to the default steps
 
+  /levelbonus               show the one-time wallet bonus of each level
+  /levelbonus Silver 0.10   the customer gets $0.10 once, when first reaching Silver
+  /levelbonus Silver 0      remove that bonus      |      /levelbonus off   remove all
+
 (In bot messages a literal angle bracket must be written as &lt; and &gt; - the bot sends HTML.)
 """
 import json
@@ -30,6 +34,7 @@ router = Router(name="loyalty_admin")
 router.message.filter(IsAdmin())
 
 MAX_REWARD_CENTS = 10_000          # $100 per friend is the most the bot accepts
+MAX_LEVEL_BONUS_CENTS = 5_000      # $50 is the most the bot accepts for one level
 _NAME_RE = re.compile(r"^[A-Za-z0-9_]{1,16}$")
 
 
@@ -95,7 +100,9 @@ async def cmd_referral(message: Message, command: CommandObject, db: Database):
 
 async def _levels_text(db: Database) -> str:
     levels = await loyalty.get_levels(db)
+    bonuses = await loyalty.get_level_bonuses(db, levels)
     lines = [f"{loyalty.LEVEL_ICONS[i]} <b>{esc(n)}</b> — from {money(c)} spent"
+             + (f" • 🎁 bonus {money(bonuses[i])}" if i in bonuses else "")
              for i, (n, c) in enumerate(levels)]
     return ("🏅 <b>Membership levels</b>\n(counted from COMPLETED orders)\n\n" + "\n".join(lines)
             + "\n\n<code>/levels Bronze=0 Silver=20 Gold=50 Diamond=100</code>\n"
@@ -131,3 +138,53 @@ async def cmd_levels(message: Message, command: CommandObject, db: Database):
         return
     await repo.set_setting(db, "levels", json.dumps(levels))
     await message.answer("✅ Saved.\n\n" + await _levels_text(db))
+
+
+async def _levelbonus_text(db: Database) -> str:
+    levels = await loyalty.get_levels(db)
+    bonuses = await loyalty.get_level_bonuses(db, levels)
+    lines = [f"{loyalty.LEVEL_ICONS[i]} <b>{esc(n)}</b> (from {money(c)} spent): "
+             + (f"<b>{money(bonuses[i])}</b>" if i in bonuses else "no bonus")
+             for i, (n, c) in enumerate(levels) if i >= 1]
+    return ("🎁 <b>Level bonus</b> (one time, in the customer's wallet)\n\n" + "\n".join(lines)
+            + "\n\nPaid when the customer FIRST reaches the level, after an order is completed. "
+              "A big purchase that skips levels pays every level it passed (same total as climbing "
+              "step by step). Only levels reached AFTER you set a bonus pay it - customers who are "
+              "already there are not paid afterwards.\n\n"
+              "<code>/levelbonus Silver 0.10</code>\n<code>/levelbonus Silver 0</code> remove one\n"
+              "<code>/levelbonus off</code> remove all")
+
+
+@router.message(Command("levelbonus"))
+async def cmd_levelbonus(message: Message, command: CommandObject, db: Database):
+    args = (command.args or "").split()
+    if not args:
+        await message.answer(await _levelbonus_text(db))
+        return
+    levels = await loyalty.get_levels(db)
+    try:
+        current = {str(k).lower(): int(v) for k, v in json.loads(await repo.get_setting(db, "level_bonus") or "{}").items()}
+    except (ValueError, TypeError, AttributeError):
+        current = {}
+    if args == ["off"]:
+        current = {}
+    elif len(args) == 2:
+        names = {n.lower(): n for i, (n, _) in enumerate(levels) if i >= 1}
+        cents = parse_money(args[1]) if args[1] != "0" else 0
+        if args[0].lower() not in names:
+            await message.answer("⚠️ Unknown level. Use one of: " + ", ".join(
+                f"<code>{esc(n)}</code>" for n in names.values()) + " (the first level cannot have a bonus).")
+            return
+        if cents is None or cents < 0 or cents > MAX_LEVEL_BONUS_CENTS:
+            await message.answer(
+                f"⚠️ Use dollars between 0 and {MAX_LEVEL_BONUS_CENTS // 100}, for example "
+                f"<code>/levelbonus {esc(names[args[0].lower()])} 0.10</code>.")
+            return
+        current[args[0].lower()] = cents
+    else:
+        await message.answer(await _levelbonus_text(db))
+        return
+    await repo.set_setting(db, "level_bonus", json.dumps({k: v for k, v in current.items() if v > 0}))
+    synced = await loyalty.sync_level_seen(db)
+    await message.answer("✅ Saved. " + (f"{synced} customer(s) who already reached a level will not be paid for it.\n\n"
+                                         if synced else "\n\n") + await _levelbonus_text(db))
