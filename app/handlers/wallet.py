@@ -46,6 +46,7 @@ async def show_history(target: Message, db: Database, user: dict) -> None:
             lang, "tx_line",
             date=short_date(r["created_at"]),
             type=t(lang, "tx_referral" if (r.get("note") or "").startswith("[referral]")
+                   else "tx_level" if (r.get("note") or "").startswith("[level]")
                    else f"tx_{r['type']}"),
             amount=money(r["amount_cents"]),
             balance=money(r["balance_after_cents"]),
