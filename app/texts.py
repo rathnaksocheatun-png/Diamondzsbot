@@ -126,6 +126,15 @@ TEXTS = {
         "tx_purchase": "Purchase",
         "tx_refund": "Refund",
         "tx_referral": "Referral bonus",
+        "tx_level": "Membership level bonus",
+        "level_up_bonus_user": (
+            "🎉 Congratulations! You reached the {icon} <b>{level}</b> membership level.\n"
+            "🎁 A bonus of <b>{amount}</b> was added to your wallet. Thank you for shopping with Diamond ZS 💎"
+        ),
+        "level_up_user": (
+            "🎉 Congratulations! You reached the {icon} <b>{level}</b> membership level.\n"
+            "Thank you for shopping with Diamond ZS 💎"
+        ),
         "referral_reward_user": (
             "🎉 Your friend <b>{friend}</b> made their first purchase!\n"
             "You earned <b>{amount}</b> in your wallet. Keep inviting friends 💎"
@@ -269,6 +278,15 @@ TEXTS = {
         "tx_purchase": "ទិញ",
         "tx_refund": "សងប្រាក់វិញ",
         "tx_referral": "ប្រាក់រង្វាន់ណែនាំមិត្ត",
+        "tx_level": "ប្រាក់រង្វាន់កម្រិតសមាជិក",
+        "level_up_bonus_user": (
+            "🎉 សូមអបអរសាទរ! អ្នកបានឡើងដល់កម្រិតសមាជិក {icon} <b>{level}</b>។\n"
+            "🎁 ប្រាក់រង្វាន់ <b>{amount}</b> ត្រូវបានបន្ថែមក្នុងកាបូបរបស់អ្នក។ អរគុណដែលជឿទុកចិត្ត Diamond ZS 💎"
+        ),
+        "level_up_user": (
+            "🎉 សូមអបអរសាទរ! អ្នកបានឡើងដល់កម្រិតសមាជិក {icon} <b>{level}</b>។\n"
+            "អរគុណដែលជឿទុកចិត្ត Diamond ZS 💎"
+        ),
         "referral_reward_user": (
             "🎉 មិត្តភក្តិ <b>{friend}</b> បានទិញលើកដំបូង!\n"
             "អ្នកបានទទួល <b>{amount}</b> ក្នុងកាបូប។ សូមបន្តអញ្ជើញមិត្តភក្តិ 💎"
