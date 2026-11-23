@@ -314,6 +314,7 @@ async def _account(request: web.Request) -> web.Response:
         "transactions": [{"type": x["type"], "amount_cents": x["amount_cents"],
                           "created_at": x["created_at"],
                           "kind": ("referral" if (x["note"] or "").startswith("[referral]")
+                                   else "level" if (x["note"] or "").startswith("[level]")
                                    else "manual" if (x["note"] or "").startswith("[manual]") else "")}
                          for x in txs],
     })
