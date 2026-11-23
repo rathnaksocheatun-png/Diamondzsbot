@@ -36,6 +36,10 @@ async def sales_report(db: Database) -> dict:
         "SELECT COUNT(*) AS n, COALESCE(SUM(amount_cents), 0) AS total FROM transactions "
         "WHERE note LIKE '[referral]%'"
     )
+    level_bonus = await db.fetchone(
+        "SELECT COUNT(*) AS n, COALESCE(SUM(amount_cents), 0) AS total FROM transactions "
+        "WHERE note LIKE '[level]%'"
+    )
     per_game = await db.fetchall(
         "SELECT g.name AS name, COUNT(o.id) AS n, COALESCE(SUM(o.price_cents), 0) AS total "
         "FROM games g LEFT JOIN orders o ON o.game_code = g.code AND o.status = 'completed' "
@@ -51,5 +55,6 @@ async def sales_report(db: Database) -> dict:
         "manual_added": manual_added,
         "manual_deducted": manual_deducted,
         "referral": referral,
+        "level_bonus": level_bonus,
         "per_game": per_game,
     }
