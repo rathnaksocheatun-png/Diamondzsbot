@@ -66,6 +66,7 @@ ADMIN_COMMANDS = [
     BotCommand(command="balancelog", description="🧾 Manual balance history"),
     BotCommand(command="referral", description="🎁 Friend referral bonus"),
     BotCommand(command="levels", description="🏅 Membership levels"),
+    BotCommand(command="levelbonus", description="🎁 Bonus for reaching a level"),
     BotCommand(command="broadcast", description="📢 Send announcement to customers"),
     BotCommand(command="howtovideo", description="🎬 Set the how-to video"),
     BotCommand(command="bakong", description="🏦 Bakong payment status"),
