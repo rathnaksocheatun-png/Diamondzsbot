@@ -482,7 +482,8 @@ async def cb_reports(cb: CallbackQuery, db: Database):
         f"👛 Total in customer wallets: {money(r['wallets_total'])}",
         f"➕ Added by admin: {r['manual_added']['n']} • {money(r['manual_added']['total'])}",
         f"➖ Deducted by admin: {r['manual_deducted']['n']} • {money(r['manual_deducted']['total'])}",
-        f"🎁 Referral bonuses paid: {r['referral']['n']} • {money(r['referral']['total'])}", "",
+        f"🎁 Referral bonuses paid: {r['referral']['n']} • {money(r['referral']['total'])}",
+        f"🏅 Level bonuses paid: {r['level_bonus']['n']} • {money(r['level_bonus']['total'])}", "",
         "<b>Completed sales by game</b>",
     ]
     for g in r["per_game"]:
