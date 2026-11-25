@@ -86,6 +86,18 @@ CREATE TABLE IF NOT EXISTS deposit_requests (
 CREATE UNIQUE INDEX IF NOT EXISTS ux_deposit_one_pending
     ON deposit_requests(user_id) WHERE status = 'pending';
 
+-- Lucky wheel: one row per spin. source = free | coin | bonus.
+CREATE TABLE IF NOT EXISTS spins (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id),
+    day         TEXT NOT NULL,
+    segment     INTEGER NOT NULL,
+    prize_cents INTEGER NOT NULL,
+    source      TEXT NOT NULL DEFAULT 'free',
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS ix_spins_user_day ON spins(user_id, day);
+
 CREATE TABLE IF NOT EXISTS settings (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -239,6 +251,14 @@ class Database:
                                           ("level_seen", "INTEGER NOT NULL DEFAULT 0")))
         await self._conn.execute(
             "CREATE INDEX IF NOT EXISTS ix_users_referred_by ON users(referred_by)")
+        # Lucky wheel: coins and bonus spins of each customer.
+        await self._add_columns("users", (
+            ("coins", "INTEGER NOT NULL DEFAULT 0"),
+            ("bonus_spins", "INTEGER NOT NULL DEFAULT 0"),
+        ))
+        await self._add_columns("spins", (
+            ("source", "TEXT NOT NULL DEFAULT 'free'"),   # free | coin | bonus
+        ))
         # One gateway transaction can never be credited to two deposit requests.
         await self._conn.execute(
             "CREATE UNIQUE INDEX IF NOT EXISTS ux_deposit_external "
