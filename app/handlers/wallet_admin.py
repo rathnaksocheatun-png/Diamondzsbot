@@ -193,3 +193,23 @@ async def cmd_balancelog(message: Message, command: CommandObject, db: Database)
             f"{short_date(r['created_at'])} • <b>{sign}{money(abs(r['amount_cents']))}</b>{who}\n"
             f"   → {money(r['balance_after_cents'])} • {esc(detail)}")
     await message.answer("\n".join(lines))
+
+
+@router.message(Command("addcoin"))
+async def cmd_addcoin(message: Message, command: CommandObject, db: Database, bot: Bot):
+    """/addcoin <id or @username> <n>   (use a negative n to take coins back)"""
+    parts = (command.args or "").split()
+    n = int(parts[1]) if len(parts) == 2 and parts[1].lstrip("-").isdigit() else None
+    if n is None or n == 0 or abs(n) > 1000:
+        await message.answer("Use: <code>/addcoin ID_or_@username 3</code> (ដកកាក់: <code>-1</code>)")
+        return
+    user = await repo.find_user_by_ref(db, parts[0])
+    if user is None:
+        await message.answer("⚠️ រកអតិថិជនមិនឃើញ។")
+        return
+    await db.execute("UPDATE users SET coins = MAX(0, coins + ?) WHERE id = ?", (n, user["id"]))
+    row = await db.fetchone("SELECT coins FROM users WHERE id = ?", (user["id"],))
+    await message.answer(f"✅ កាក់របស់ {esc(user['full_name'])}: <b>{row['coins']}</b>")
+    if n > 0:
+        await notify_user(bot, user["telegram_id"],
+                          f"🪙 អ្នកទទួលបាន {n} ដុំកាក់! បង្វិលកង់សំណាងក្នុង Mini App ➜ Profile។")
