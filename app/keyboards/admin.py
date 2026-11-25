@@ -36,6 +36,7 @@ def admin_menu_kb() -> InlineKeyboardMarkup:
         [_btn("🛍 Products", "adm:products"), _btn("💰 Deposits", "adm:deposits")],
         [_btn("🔌 Bay2Game (auto games & packages)", "adm:b2g")],
         [_btn("📊 Sales report", "adm:reports"), _btn("🎁 Promotions text", "adm:promo")],
+        [_btn("🎡 Lucky wheel stats", "adm:spin")],
         [_btn("✖️ Close", "adm:close")],
     ])
 
