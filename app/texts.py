@@ -109,6 +109,7 @@ TEXTS = {
         "btn_check_payment": "🔄 Check payment",
         "btn_pay_page": "💳 Open payment page",
         "order_completed_user": "✅ Your order #{id} ({product}) is completed. Thank you!",
+        "coin_reward_user": "🪙 You got {coins} free coin(s) for this order! Spin the Lucky Wheel in the Mini App → Profile.",
         "order_created_auto": (
             "✅ <b>Order #{id} received!</b>\n\n"
             "{price} was taken from your wallet. We are delivering your diamonds "
@@ -261,6 +262,7 @@ TEXTS = {
         "btn_check_payment": "🔄 ពិនិត្យការបង់ប្រាក់",
         "btn_pay_page": "💳 បើកទំព័របង់ប្រាក់",
         "order_completed_user": "✅ ការបញ្ជាទិញ #{id} ({product}) បានបញ្ចប់។ អរគុណ!",
+        "coin_reward_user": "🪙 អ្នកទទួលបាន {coins} ដុំកាក់ឥតគិតថ្លៃពីការបញ្ជាទិញនេះ! បង្វិលកង់សំណាងក្នុង Mini App ➜ Profile។",
         "order_created_auto": (
             "✅ <b>បានទទួលការបញ្ជាទិញ #{id}!</b>\n\n"
             "{price} ត្រូវបានកាត់ចេញពីកាបូបរបស់អ្នក។ យើងកំពុងដឹកជូនពេជ្រដោយស្វ័យប្រវត្តិ "
