@@ -7,6 +7,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import secrets
 import time
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from app.keyboards.admin import view_order_kb
 from app.services import fulfilment
 from app.services import loyalty
 from app.services import online_payments as op
+from app.services import coins as coin_service
 from app.services import orders as order_service
 try:
     from app.services.khpay import KhpayError
@@ -259,11 +261,13 @@ async def _catalog(request: web.Request) -> web.Response:
         if user is None:
             return _json({"error": "unauthorized"}, 401)
     balance = None
+    coins = None
     if user is not None:
         row = await request.app["db"].fetchone(
-            "SELECT language, balance_cents FROM users WHERE telegram_id = ?", (user["id"],))
+            "SELECT language, balance_cents, coins FROM users WHERE telegram_id = ?", (user["id"],))
         if row:
             balance = row["balance_cents"]
+            coins = row["coins"]
         if row and row["language"] in ("en", "km"):
             lang = row["language"]
         else:
@@ -272,7 +276,9 @@ async def _catalog(request: web.Request) -> web.Response:
         lang = "km"
     return _json({"lang": lang, "games": await _games(request.app),
                   "bot": request.app["bot_username"], "signed_in": user is not None,
-                  "balance_cents": balance, "banner": request.app["cache"].get("banner", ""),
+                  "balance_cents": balance, "coins": coins,
+                  "coin_rewards": await coin_service.get_rewards(request.app["db"]),
+                  "banner": request.app["cache"].get("banner", ""),
                   "banner_v": _file_ver(HERE / "banner.jpg"),
                   "video_v": _file_ver(HERE / "banner.mp4"),
                   "hot": request.app["cache"].get("hot", []),
@@ -307,6 +313,8 @@ async def _account(request: web.Request) -> web.Response:
         **extras,
         "registered": True, "tg_id": user["id"], "name": row["full_name"] or name,
         "username": row["username"] or "", "balance_cents": row["balance_cents"],
+        "coins": row["coins"], "can_spin": await _can_spin(db, row),
+        "spin_segments": SPIN_SEGMENTS, "coin_packs": await coin_service.get_packs(db),
         "total_orders": stats["n"], "total_spent_cents": stats["spent"],
         "orders": [{"id": o["id"], "name": o["product_name"], "game": o["game_name"],
                     "price_cents": o["price_cents"], "status": o["status"],
@@ -315,7 +323,9 @@ async def _account(request: web.Request) -> web.Response:
                           "created_at": x["created_at"],
                           "kind": ("referral" if (x["note"] or "").startswith("[referral]")
                                    else "level" if (x["note"] or "").startswith("[level]")
-                                   else "manual" if (x["note"] or "").startswith("[manual]") else "")}
+                                   else "manual" if (x["note"] or "").startswith("[manual]")
+                                   else "spin" if (x["note"] or "").startswith("[spin]")
+                                   else "coin" if (x["note"] or "").startswith("[coin]") else "")}
                          for x in txs],
     })
 
@@ -531,6 +541,153 @@ async def _place_order(app, uid: int, product_id: int, body: dict) -> web.Respon
                   "balance_cents": row["balance_cents"] if row else None})
 
 
+# ---------------------------------------------------------------- Lucky wheel
+# Rules: 1 free spin per day (Cambodia day, UTC+7). After that a spin costs 1 coin.
+# "Spin again" gives one extra spin that costs nothing. All random choices are made HERE.
+SPIN_SEGMENTS = [5, 0, 10, -1, 50, 0]          # cents; 0 = nothing; -1 = spin again
+SPIN_WEIGHTS = {0: 40, -1: 20, 5: 25, 10: 13, 50: 2}     # chance (%) of each result
+_DAY = "date('now','+7 hours')"
+
+
+def _pick_segment() -> int:
+    rng = secrets.SystemRandom()
+    value = rng.choices(list(SPIN_WEIGHTS), weights=list(SPIN_WEIGHTS.values()))[0]
+    return rng.choice([i for i, v in enumerate(SPIN_SEGMENTS) if v == value])
+
+
+async def _can_spin(db, row) -> bool:
+    if row["bonus_spins"] > 0 or row["coins"] > 0:
+        return True
+    used = await db.fetchone(
+        f"SELECT 1 AS x FROM spins WHERE user_id = ? AND day = {_DAY} AND source = 'free'",
+        (row["id"],))
+    return used is None
+
+
+async def _do_spin(db, tg_id: int) -> tuple:
+    async with db.transaction() as conn:
+        cur = await conn.execute(
+            "SELECT id, balance_cents, coins, bonus_spins FROM users WHERE telegram_id = ?",
+            (tg_id,))
+        user = await cur.fetchone()
+        if user is None:
+            return "no_user", None
+        coins, bonus = user["coins"], user["bonus_spins"]
+        cur = await conn.execute(
+            f"SELECT 1 FROM spins WHERE user_id = ? AND day = {_DAY} AND source = 'free'",
+            (user["id"],))
+        free_used = await cur.fetchone() is not None
+        if bonus > 0:
+            source, bonus = "bonus", bonus - 1
+        elif not free_used:
+            source, free_used = "free", True
+        elif coins > 0:
+            source, coins = "coin", coins - 1
+        else:
+            return "no_spin", None
+        idx = _pick_segment()
+        prize = SPIN_SEGMENTS[idx]
+        if prize == -1:
+            bonus += 1
+        paid = max(prize, 0)
+        balance = user["balance_cents"] + paid
+        await conn.execute(
+            f"INSERT INTO spins (user_id, day, segment, prize_cents, source) "
+            f"VALUES (?, {_DAY}, ?, ?, ?)", (user["id"], idx, paid, source))
+        await conn.execute(
+            "UPDATE users SET balance_cents = ?, coins = ?, bonus_spins = ? WHERE id = ?",
+            (balance, coins, bonus, user["id"]))
+        if paid:
+            await conn.execute(
+                "INSERT INTO transactions (user_id, type, amount_cents, balance_after_cents, note) "
+                "VALUES (?, 'deposit', ?, ?, ?)",
+                (user["id"], paid, balance, "[spin] Lucky wheel"))
+        return "ok", {"segment": idx, "prize_cents": paid, "again": prize == -1,
+                      "balance_cents": balance, "coins": coins,
+                      "can_spin": bonus > 0 or coins > 0 or not free_used}
+
+
+async def _spin(request: web.Request) -> web.Response:
+    app = request.app
+    user = validate_init_data(request.headers.get("X-Init-Data", ""), app["bot_token"])
+    if user is None:
+        return _fail("unauthorized", 401)
+    uid, now = user["id"], time.monotonic()
+    key = ("spin", uid)
+    recent = [x for x in app["attempts"].get(key, []) if now - x < 60]
+    if len(recent) >= 10:
+        return _fail("rate_limited", 429)
+    app["attempts"][key] = recent + [now]
+    if uid in app["busy"]:
+        return _fail("busy", 409)
+    app["busy"].add(uid)
+    try:
+        status, data = await _do_spin(app["db"], uid)
+    except Exception:
+        log.exception("Mini App spin failed")
+        return _fail("error")
+    finally:
+        app["busy"].discard(uid)
+    if status != "ok":
+        return _fail(status)
+    return _json({"ok": True, **data})
+
+
+# ------------------------------------------------------------------ Buy coins
+async def _do_buy_coins(db, tg_id: int, pack) -> tuple:
+    packs = await coin_service.get_packs(db)
+    if not isinstance(pack, int) or isinstance(pack, bool) or not 0 <= pack < len(packs):
+        return "bad_request", None
+    coins_n, price = packs[pack]
+    async with db.transaction() as conn:
+        cur = await conn.execute(
+            "SELECT id, balance_cents, coins FROM users WHERE telegram_id = ?", (tg_id,))
+        user = await cur.fetchone()
+        if user is None:
+            return "no_user", None
+        if user["balance_cents"] < price:
+            return "insufficient", {"price_cents": price, "balance_cents": user["balance_cents"]}
+        balance = user["balance_cents"] - price
+        await conn.execute(
+            "UPDATE users SET balance_cents = ?, coins = coins + ? WHERE id = ?",
+            (balance, coins_n, user["id"]))
+        await conn.execute(
+            "INSERT INTO transactions (user_id, type, amount_cents, balance_after_cents, note) "
+            "VALUES (?, 'purchase', ?, ?, ?)",
+            (user["id"], -price, balance, f"[coin] Buy {coins_n} coin(s)"))
+        return "ok", {"balance_cents": balance, "coins": user["coins"] + coins_n}
+
+
+async def _buy_coins(request: web.Request) -> web.Response:
+    app = request.app
+    user = validate_init_data(request.headers.get("X-Init-Data", ""), app["bot_token"])
+    if user is None:
+        return _fail("unauthorized", 401)
+    uid, now = user["id"], time.monotonic()
+    key = ("coin", uid)
+    recent = [x for x in app["attempts"].get(key, []) if now - x < 60]
+    if len(recent) >= 10:
+        return _fail("rate_limited", 429)
+    app["attempts"][key] = recent + [now]
+    try:
+        pack = (await request.json())["pack"]
+    except Exception:
+        return _fail("bad_request", 400)
+    if uid in app["busy"]:
+        return _fail("busy", 409)
+    app["busy"].add(uid)
+    try:
+        status, data = await _do_buy_coins(app["db"], uid, pack)
+    except Exception:
+        log.exception("Mini App coin purchase failed")
+        return _fail("error")
+    finally:
+        app["busy"].discard(uid)
+    if status != "ok":
+        return _fail(status, **(data or {}))
+    return _json({"ok": True, **data})
+
+
 async def start_webapp(db, bot_token: str, port: int, bot_username: str = "",
                        bot=None, settings=None, b2g=None, pay=None) -> web.AppRunner:
     app = web.Application(middlewares=[_headers], client_max_size=8192)
@@ -559,6 +716,8 @@ async def start_webapp(db, bot_token: str, port: int, bot_username: str = "",
         web.get("/img/{code}", _image),
         web.get("/pimg/{pid}", _pimage),
         web.get("/api/account", _account),
+        web.post("/api/spin", _spin),
+        web.post("/api/buycoin", _buy_coins),
     ])
     runner = web.AppRunner(app, access_log=None)
     await runner.setup()
