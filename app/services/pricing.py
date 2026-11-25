@@ -90,11 +90,20 @@ async def sync_prices(db: Database, client: Bay2GameClient,
     return changes, problems
 
 
-def describe(changes: list) -> str:
+def describe(changes: list, limit: int = 2800) -> str:
+    """HTML list of price changes. It is cut short (whole lines only, so no HTML tag is ever
+    broken) because Telegram refuses messages longer than 4096 characters."""
     lines = [f"• <b>#{c.product_id}</b> {esc(c.name)}: {money(c.old_cents)} → "
              f"<b>{money(c.new_cents)}</b> (cost {money(c.cost_cents)} + profit {money(c.margin_cents)})"
              for c in changes]
-    return "\n".join(lines)
+    out, size = [], 0
+    for i, line in enumerate(lines):
+        if size + len(line) + 1 > limit:
+            out.append(f"… និង {len(lines) - i} កញ្ចប់ទៀត (តម្លៃត្រូវបានកែរួចហើយ)")
+            break
+        out.append(line)
+        size += len(line) + 1
+    return "\n".join(out)
 
 
 async def watch_prices(bot: Bot, db: Database, client: Bay2GameClient,
