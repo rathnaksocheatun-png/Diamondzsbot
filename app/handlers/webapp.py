@@ -8,6 +8,9 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, W
 
 from app.database import repositories as repo
 from app.database.db import Database
+from app.services import coins as coin_service
+from app.utils.formatting import money
+from app.utils.validators import parse_money
 from app.utils.filters import IsAdmin
 
 router = Router(name="webapp")
@@ -148,3 +151,58 @@ async def cmd_hot(message: Message, db: Database):
         lines.append(f"<code>{i}</code> → {escape(str(p.get('name', '?'))) if p else '?'}")
     await message.answer("🔥 Hot packages (max 8):\n" + ("\n".join(lines) or "none (automatic)")
                          + "\n\n/hot add 15 26   |   /hot remove 15   |   /hot clear\nNumbers: /pkgs &lt;game_code&gt;")
+
+
+@admin.message(Command("coinprice"))
+async def cmd_coinprice(message: Message, db: Database):
+    """/coinprice | /coinprice 1=0.10 5=0.45 10=0.80 | /coinprice reset"""
+    arg = (message.text or "").partition(" ")[2].strip()
+    if arg.lower() == "reset":
+        await coin_service.set_packs(db, None)
+    elif arg:
+        packs = []
+        for part in arg.split():
+            count, _, price = part.partition("=")
+            cents = parse_money(price)
+            if not count.isdigit() or not 0 < int(count) <= 1000 or not cents:
+                await message.answer("⚠️ ខុសទម្រង់។ ឧ. <code>/coinprice 1=0.10 5=0.45 10=0.80</code>")
+                return
+            packs.append((int(count), cents))
+        if not 1 <= len(packs) <= 6:
+            await message.answer("⚠️ ដាក់បាន ១ ដល់ ៦ កញ្ចប់។")
+            return
+        await coin_service.set_packs(db, packs)
+    packs = await coin_service.get_packs(db)
+    lines = "\n".join(f"🪙 ×{c} = <b>{money(p)}</b>" for c, p in packs)
+    await message.answer("✅ <b>តម្លៃកាក់បច្ចុប្បន្ន</b>\n" + lines
+                         + "\n\nកែ: <code>/coinprice 1=0.10 5=0.45 10=0.80</code>\n"
+                           "ដើម: <code>/coinprice reset</code>")
+
+
+@admin.message(Command("coinreward"))
+async def cmd_coinreward(message: Message, db: Database):
+    """/coinreward | /coinreward 5=1 10=3 | /coinreward off | /coinreward reset"""
+    arg = (message.text or "").partition(" ")[2].strip()
+    if arg.lower() == "reset":
+        await coin_service.set_rewards(db, None)
+    elif arg.lower() == "off":
+        await coin_service.set_rewards(db, [])
+    elif arg:
+        tiers = []
+        for part in arg.split():
+            amount, _, coins = part.partition("=")
+            cents = parse_money(amount)
+            if not cents or not coins.isdigit() or not 0 < int(coins) <= 100:
+                await message.answer("⚠️ ខុសទម្រង់។ ឧ. <code>/coinreward 5=1 10=3</code>\n"
+                                     "(លុយ$=ចំនួនកាក់)")
+                return
+            tiers.append((cents, int(coins)))
+        if not 1 <= len(tiers) <= 6:
+            await message.answer("⚠️ ដាក់បាន ១ ដល់ ៦ កម្រិត។")
+            return
+        await coin_service.set_rewards(db, tiers)
+    tiers = await coin_service.get_rewards(db)
+    lines = "\n".join(f"🛒 ទិញ ≥ <b>{money(m)}</b> → 🪙 {c}" for m, c in sorted(tiers)) or "(បិទ)"
+    await message.answer("🎁 <b>កាក់ឥតគិតថ្លៃពី order</b>\n" + lines
+                         + "\n\nកែ: <code>/coinreward 5=1 10=3</code>\n"
+                           "បិទ: <code>/coinreward off</code> • ដើម: <code>/coinreward reset</code>")
