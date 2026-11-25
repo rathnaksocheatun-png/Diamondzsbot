@@ -256,5 +256,7 @@ async def cmd_sync(message: Message, db: Database, b2g: Optional[Bay2GameClient]
     text = ("💲 <b>Prices updated</b>\n" + pricing.describe(changes)) if changes \
         else "✅ All prices are already correct."
     if problems:
-        text += "\n\n⚠️ " + "\n⚠️ ".join(esc(x) for x in problems)
+        text += "\n\n⚠️ " + "\n⚠️ ".join(esc(x) for x in problems[:5])
+        if len(problems) > 5:
+            text += f"\n… និង {len(problems) - 5} ទៀត"
     await message.answer(text)
