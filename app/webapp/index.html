@@ -287,6 +287,23 @@ html.sc .btn,html.sc .btn:before,html.sc .tile,html.sc .gs,html.sc #glint,html.s
 .ref .sub{margin-top:4px}.rlink{font-size:12px;font-weight:700;word-break:break-all;padding:9px 11px;border-radius:11px;background:rgba(255,255,255,.4);margin:10px 0;user-select:all;-webkit-user-select:all}
 .lvp{flex:none;padding:6px 12px;border-radius:99px;font-size:13px;font-weight:800;color:#fff;background:linear-gradient(135deg,rgba(255,200,70,.9),rgba(255,130,30,.9));box-shadow:0 2px 8px rgba(0,0,0,.18);text-shadow:0 1px 2px rgba(0,0,0,.3);white-space:nowrap}
 .rbtn{display:flex;gap:10px}.rbtn .btn{flex:1}.rstat{display:flex;gap:8px;margin-top:12px;text-align:center}.rs{flex:1}.rs .nm{font-size:20px}
+/* ---- lucky wheel ---- */
+.wheelbox{text-align:center}
+.wheelwrap{position:relative;width:min(78vw,280px);margin:12px auto 6px}
+.wheel{width:100%;aspect-ratio:1;border-radius:50%;border:4px solid #fff;
+ box-shadow:0 0 0 4px rgba(255,255,255,.35),0 8px 20px rgba(8,34,140,.5);
+ transition:transform 5s cubic-bezier(.12,.72,.1,1);will-change:transform}
+.wheel svg{display:block;width:100%}
+.wptr{position:absolute;left:50%;top:-10px;margin-left:-14px;z-index:2;width:0;height:0;
+ border-left:14px solid transparent;border-right:14px solid transparent;border-top:26px solid #ffc857;
+ filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+html.spin .btn,html.spin .btn:before,html.spin .tile,html.spin .gs,html.spin #glint,html.spin #snow span,html.spin .gem{animation-play-state:paused!important}
+/* ---- coin chip next to the wallet ---- */
+.coinchip{display:inline-flex;align-items:center;gap:6px;margin-top:2px;padding:5px 16px;border-radius:999px;border:1.5px solid #fff;
+ font-family:"Poppins","Kantumruy Pro",-apple-system,sans-serif;font-size:16px;font-weight:900;color:#3a2600;text-shadow:none;cursor:pointer;
+ background:linear-gradient(180deg,#fff1c2,#ffc857 55%,#f3a81d);box-shadow:0 3px 0 #a8730a,inset 0 1px 0 rgba(255,255,255,.85)}
+.coinchip:active{transform:translateY(2px) scale(.96)!important}
+
 </style></head><body><div id="bgart"></div><div id="shade"></div><div id="glint"></div>
 <div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity="1" stroke-width="2" stroke-linejoin="round" fill-opacity=".48"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
 <g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
@@ -323,6 +340,17 @@ var E={insufficient:["សមតុល្យមិនគ្រប់។ សូម
  invalid_player_id:["Player ID មិនត្រឹមត្រូវ។","Invalid Player ID."],invalid_server_id:["Zone/Server ID មិនត្រឹមត្រូវ។","Invalid Zone/Server ID."],
  no_user:["សូមចុច /start ក្នុង bot មុន។","Please send /start to the bot first."],rate_limited:["ព្យាយាមញឹកញាប់ពេក សូមរង់ចាំ។","Too many tries. Please wait."],
  bad_amount:["ចំនួនទឹកប្រាក់ត្រូវនៅចន្លោះ $0.50 និង $500។","Amount must be between $0.50 and $500."],deposit_pending:["មាន QR មួយកំពុងរង់ចាំ។ សូមរង់ចាំ ៣ នាទី ឬបោះបង់ក្នុង bot។","A QR is already waiting. Wait 3 minutes or cancel it in the bot."],pay_error:["ប្រព័ន្ធទូទាត់មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Payment system problem. Try again."],no_pay:["ការដាក់ប្រាក់មិនទាន់បើកទេ។","Deposits are not available right now."],busy:["កំពុងដំណើរការ សូមរង់ចាំ។","Still working. Please wait."],error:["មានបញ្ហា សូមព្យាយាមម្តងទៀត។","Something went wrong. Try again."]};
+Object.assign(S,{tx_spin:["រង្វាន់កង់សំណាង","Lucky wheel prize"],tx_coin:["ទិញកាក់","Buy coins"],spin:["វង់ត្រឹះសំណាង 🎡","Lucky Wheel 🎡"],spinbtn:["បង្វិល","Spin"],
+ spinwait:["អ្នកបានបង្វិលឥតគិតថ្លៃថ្ងៃនេះហើយ។ ត្រូវមាន 🪙 ១ ដើម្បីបង្វិលបន្ត។","Free spin used today. You need 1 🪙 to spin again."],
+ spinretry:["🔁 បានបង្វិលថែមម្ដងទៀត!","🔁 Spin again!"],
+ spinnone:["😅 អត់បានអីទេ សាកម្ដងទៀត!","😅 Nothing this time!"],
+ spinwin:["🎉 អ្នកឈ្នះ ","🎉 You won "],coin:["ដុំកាក់","Coins"],
+ spinnote:["បង្វិលឥតគិតថ្លៃ ១ ដង/ថ្ងៃ។ ក្រោយនោះប្រើ 🪙 ១ ក្នុងមួយដង។ រង្វាន់ចូល Wallet ភ្លាម។","1 free spin/day, then 1 🪙 per spin. Prizes go to your wallet instantly."],
+ buycoin:["ទិញកាក់","Buy coins"],coinok:["✅ ទិញកាក់បានជោគជ័យ!","✅ Coins purchased!"],
+ rwhead:["🎁 ទិញពេជ្រ ទទួលកាក់ឥតគិតថ្លៃ!","🎁 Buy diamonds, get free coins!"],
+ rwget:["ទិញនេះទទួលបាន 🪙 ","This purchase earns 🪙 "],
+ rwafter:["(ពេល order បានបញ្ចប់)","(when the order is completed)"]});
+Object.assign(E,{no_spin:S.spinwait,already:S.spinwait});
 var st={lang:0,games:[],bot:"",signed:false,bal:null,pay:false,banner:"",hot:[],gd:{km:false,en:false},tab:"home",game:null,acct:null,filter:"all",failed:false,bv:"",vv:""};
 function T(k){var v=S[k];return v?v[st.lang]:k}
 function el(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x!==undefined)n.textContent=x;return n}
@@ -341,6 +369,7 @@ function pad(inputs){var act=inputs[0];function setAct(i){act=i;inputs.forEach(f
  var g=el("div","kp");["1","2","3","4","5","6","7","8","9","C","0","⌫"].forEach(function(k){var b=el("button","key"+(k==="C"||k==="⌫"?" fn":""),k);b.type="button";
   b.onclick=function(){beep(k==="⌫"?420:k==="C"?330:620+Number(k)*45);var v=act.value;if(k==="⌫")v=v.slice(0,-1);else if(k==="C")v="";else if(v.length<20)v+=k;act.value=v};g.appendChild(b)});return g}
 function buy(p,g){var b=mk();b.appendChild(el("h3","",p.emoji+" "+p.name));b.appendChild(el("div","sub",g.name+" · "+money(p.price_cents)+" · "+T("bal")+" "+money(st.bal)));
+ var rw=rewardFor(p.price_cents);if(rw)b.appendChild(el("div","msg ok",T("rwget")+rw+" "+T("rwafter")));
  b.appendChild(el("label","",T("pid")));var pid=el("input");b.appendChild(pid);
  var sid=el("input");if(g.needs_server){b.appendChild(el("label","",T("sid")));b.appendChild(sid)}
  b.appendChild(pad(g.needs_server?[pid,sid]:[pid]));
@@ -434,7 +463,11 @@ function head(){var w=el("div");
  var g=el("div","grow");g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
  var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
  var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);w.appendChild(c);return w}
-function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));c.appendChild(g);
+function coinsNow(){return(st.acct&&st.acct.coins!=null)?st.acct.coins:(st.coins||0)}
+function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));
+ if(st.signed){var ch=el("button","coinchip","🪙 "+coinsNow());
+  ch.onclick=function(){st.tab="profile";st.game=null;draw();window.scrollTo(0,0);if(st.signed&&!st.acct)account()};g.appendChild(ch)}
+ c.appendChild(g);
  if(st.signed){var b=el("button","btn gold",T("deposit"));b.onclick=function(){if(st.pay)depositSheet();else notice(T("dep"))};c.appendChild(b)}return c}
 function gate(box){if(st.signed)return false;box.appendChild(el("div","note",T("bn")));
  if(st.bot){var a=el("a","btn w",T("ob"));a.href="https://t.me/"+encodeURIComponent(st.bot);a.target="_blank";a.rel="noopener";a.style.cssText="display:block;text-align:center;text-decoration:none";box.appendChild(a)}return true}
@@ -443,6 +476,7 @@ function home(box){var u=el("div","card top");var a=el("div","av",((st.acct&&st.
  if(st.acct&&st.acct.level)u.appendChild(el("div","lvp",st.acct.level.icon+" "+st.acct.level.name));
  if(st.signed)box.appendChild(u);box.appendChild(balCard());
  if(st.banner){var bn=el("div","card banner",st.banner);box.appendChild(bn)}
+ var rb=rewardBanner();if(rb)box.appendChild(rb);
  box.appendChild(el("h3","",T("games")));var h=el("div","hs");st.games.slice(0,10).forEach(function(g){h.appendChild(gameTile(g))});box.appendChild(h);
  var all=[];st.games.forEach(function(g){g.products.forEach(function(p){all.push([p,g])})});
  /* only packages the bot really delivers by itself (Bay2Game) can be "hot"; if there are none the whole section is hidden */
@@ -457,11 +491,12 @@ function playBtn(){if(!st.gd.km&&!st.gd.en)return el("span");
   var q=gaud.play();if(q&&q.then)q.then(draw).catch(function(){notice(T("guideErr"))})};
  return b}
 function store(box){if(!st.games.length){box.appendChild(el("div","note",T("empty")));return}
+ var rb=rewardBanner();if(rb)box.appendChild(rb);
  var g=st.games.filter(function(x){return x.code===st.game})[0];
  if(!g){var gr=el("div","gg");st.games.forEach(function(x){gr.appendChild(gameTile(x))});box.appendChild(gr);return}
  var b=el("button","btn s alt back",T("back"));b.onclick=function(){st.game=null;draw()};var rw=el("div","row");rw.appendChild(b);rw.appendChild(el("div","grow"));rw.appendChild(playBtn());box.appendChild(rw);var gh=el("h3","gt");gh.appendChild(el("span","",g.emoji));gh.appendChild(el("span","tx",g.name));box.appendChild(gh);
  g.products.forEach(function(p){box.appendChild(pkg(p,g))})}
-function txName(x){return x.kind==="referral"?T("tx_ref"):x.kind==="level"?T("tx_lvl"):x.kind==="manual"?T(x.amount_cents>=0?"adj_in":"adj_out"):x.type==="deposit"?T("deposit_t"):(x.type==="purchase"||x.type==="refund")?T(x.type):T(x.amount_cents>=0?"adj_in":"adj_out")}
+function txName(x){return x.kind==="spin"?T("tx_spin"):x.kind==="coin"?T("tx_coin"):x.kind==="referral"?T("tx_ref"):x.kind==="level"?T("tx_lvl"):x.kind==="manual"?T(x.amount_cents>=0?"adj_in":"adj_out"):x.type==="deposit"?T("deposit_t"):(x.type==="purchase"||x.type==="refund")?T(x.type):T(x.amount_cents>=0?"adj_in":"adj_out")}
 function when(s){return(s||"").slice(0,16)}
 function wallet(box){if(gate(box))return;box.appendChild(balCard());if(waitAcct(box))return;box.appendChild(el("h3","",T("hist")));var t=(st.acct&&st.acct.transactions)||[];
  if(!t.length)box.appendChild(el("div","note",T("none")));
@@ -488,8 +523,60 @@ function refCard(a){var r=a.referral;if(!r||!r.active||!r.link)return null;var c
  br.appendChild(cp);br.appendChild(sh);c.appendChild(br);var row=el("div","rstat");
  [[T("refInv"),r.invited],[T("refBuy"),r.bought],[T("refEarn"),money(r.earned_cents)]].forEach(function(p){var d=el("div","rs");d.appendChild(el("div","sub",p[0]));d.appendChild(el("div","nm",String(p[1])));row.appendChild(d)});
  c.appendChild(row);return c}
+function wheelSvg(seg){var NS="http://www.w3.org/2000/svg",s=document.createElementNS(NS,"svg");s.setAttribute("viewBox","0 0 300 300");
+ var n=seg.length,step=360/n,R=140;
+ function pt(a){var r=a*Math.PI/180;return[150+R*Math.sin(r),150-R*Math.cos(r)]}
+ function mkn(t,o){var x=document.createElementNS(NS,t);for(var k in o)x.setAttribute(k,o[k]);return x}
+ seg.forEach(function(v,i){var p1=pt(i*step),p2=pt((i+1)*step);
+  s.appendChild(mkn("path",{d:"M150 150L"+p1[0]+" "+p1[1]+"A"+R+" "+R+" 0 0 1 "+p2[0]+" "+p2[1]+"Z",
+   fill:v===0?"#5b6b8f":(v<0?"#7a3fe0":(i%2?"#ff6fbe":"#2a95ff")),stroke:"#fff","stroke-width":3}));
+  var g=mkn("g",{transform:"rotate("+((i+.5)*step)+" 150 150)"});
+  var t=mkn("text",{x:150,y:52,"text-anchor":"middle",fill:"#fff","font-size":19,"font-weight":800});
+  t.textContent=v===0?"❌":(v<0?"🔁":money(v));g.appendChild(t);s.appendChild(g)});
+ s.appendChild(mkn("circle",{cx:150,cy:150,r:18,fill:"#ffc857",stroke:"#fff","stroke-width":3}));return s}
+function coinSheet(){var b=mk();b.appendChild(el("h3","","🪙 "+T("buycoin")));
+ b.appendChild(el("div","sub",T("bal")+" "+money(st.bal)));var m=el("div","msg");
+ (st.acct.coin_packs||[]).forEach(function(p,i){var x=el("button","btn w","🪙 ×"+p[0]+" — "+money(p[1]));
+  x.onclick=function(){x.disabled=true;m.textContent="…";m.className="msg";
+   api("/api/buycoin",{pack:i}).then(function(d){
+    if(d.ok){st.bal=d.balance_cents;st.acct.balance_cents=d.balance_cents;st.acct.coins=d.coins;st.acct.can_spin=true;
+     st.spinMsg=T("coinok");shut();chime();draw();account()}
+    else{x.disabled=false;m.textContent=(E[d.error]||E.error)[st.lang];m.className="msg err"}})
+   .catch(function(){x.disabled=false;m.textContent=E.error[st.lang];m.className="msg err"})};
+  b.appendChild(x)});
+ b.appendChild(m);var no=el("button","btn alt w",T("close"));no.onclick=shut;b.appendChild(no)}
+function wheelCard(){var a=st.acct||{},seg=a.spin_segments||[];if(!seg.length)return null;
+ var c=el("div","card wheelbox");c.appendChild(el("div","nm",T("spin")));
+ var w=el("div","wheelwrap");w.appendChild(el("div","wptr"));
+ var wh=el("div","wheel");wh.appendChild(wheelSvg(seg));wh.style.transform="rotate("+(st.rot||0)+"deg)";w.appendChild(wh);c.appendChild(w);
+ c.appendChild(el("div","sub","🪙 "+T("coin")+": "+(a.coins||0)));
+ var m=el("div","msg",st.spinMsg||(a.can_spin?"":T("spinwait")));m.style.textAlign="center";c.appendChild(m);
+ var b=el("button","btn gold w",T("spinbtn"));b.disabled=!a.can_spin||!!st.spinning;
+ b.onclick=function(){spin(wh,m,b)};c.appendChild(b);
+ var bc=el("button","btn alt w","🪙 "+T("buycoin"));bc.disabled=!!st.spinning;bc.onclick=coinSheet;c.appendChild(bc);
+ c.appendChild(el("div","note",T("spinnote")));return c}
+function spin(wh,m,b){if(st.spinning)return;st.spinning=true;b.disabled=true;st.spinMsg="";m.textContent="";
+ api("/api/spin",{}).then(function(d){
+  if(!d.ok){st.spinning=false;if(d.error==="already"||d.error==="no_spin")st.acct.can_spin=false;
+   m.textContent=(E[d.error]||E.error)[st.lang];m.className="msg err";b.disabled=!st.acct.can_spin;return}
+  var step=360/st.acct.spin_segments.length,c=(d.segment+.5)*step,j=(Math.random()-.5)*step*.6,cur=st.rot||0;
+  st.rot=cur-(cur%360)+360*6+(360-c)+j;
+  document.documentElement.classList.add("spin");void wh.offsetWidth;wh.style.transform="rotate("+st.rot+"deg)";
+  setTimeout(function(){st.spinning=false;document.documentElement.classList.remove("spin");
+   st.bal=d.balance_cents;st.acct.balance_cents=d.balance_cents;st.acct.can_spin=d.can_spin;
+   st.acct.coins=d.coins;
+   st.spinMsg=d.prize_cents?T("spinwin")+money(d.prize_cents):(d.again?T("spinretry"):T("spinnone"));
+   if(d.prize_cents){chime();try{tg.HapticFeedback.notificationOccurred("success")}catch(e){}}
+   if(st.tab==="profile")draw();account()},5200)})
+ .catch(function(){st.spinning=false;m.textContent=E.error[st.lang];m.className="msg err";b.disabled=false})}
+function rewardFor(c){var b=0;(st.rewards||[]).forEach(function(r){if(c>=r[0]&&r[1]>b)b=r[1]});return b}
+function rewardBanner(){var r=(st.rewards||[]).slice().sort(function(a,b){return a[0]-b[0]});if(!r.length)return null;
+ var c=el("div","card banner");c.appendChild(el("div","",T("rwhead")));
+ var s=el("div","sub",r.map(function(x){return"≥ "+money(x[0])+" → 🪙 "+x[1]}).join("  •  "));
+ s.style.cssText="margin-top:4px;text-align:center";c.appendChild(s);return c}
 function profile(box){if(gate(box))return;if(waitAcct(box))return;var a=st.acct||{};var c=el("div","card top");c.appendChild(el("div","av",(a.name||"?").charAt(0).toUpperCase()));
  var g=el("div","grow");g.appendChild(el("div","nm",a.name||""));if(a.username)g.appendChild(el("div","sub","@"+a.username));c.appendChild(g);box.appendChild(c);box.appendChild(balCard());
+ var wc=wheelCard();if(wc)box.appendChild(wc);
  var s=el("div","card row stats");[[T("tord"),a.total_orders||0],[T("tsp"),money(a.total_spent_cents||0)]].forEach(function(p,i){var d=el("div","grow stc"+(i+1));d.appendChild(el("div","sub",p[0]));d.appendChild(el("div","nm",String(p[1])));s.appendChild(d)});box.appendChild(s);
  var l=el("div","card row");l.appendChild(el("div","grow",T("lang")));var b=el("button","btn s alt",T("lg"));b.onclick=function(){st.lang=1-st.lang;draw()};l.appendChild(b);box.appendChild(l);
  var lc=lvlCard(a);if(lc)box.appendChild(lc);var rc=refCard(a);if(rc)box.appendChild(rc);
@@ -514,6 +601,7 @@ function load(tries){tries=tries||0;st.failed=false;var app=document.getElementB
  jget("/api/catalog",15000).then(function(d){
   st.lang=d.lang==="en"?1:0;st.games=d.games||[];st.bot=d.bot||"";st.pay=!!d.pay;st.hot=d.hot||[];st.banner=d.banner||"";st.bv=d.banner_v||"";st.vv=d.video_v||"";st.signed=!!d.signed_in;st.bal=d.balance_cents==null?(st.bal):d.balance_cents;
   HB.setVer(st.vv,st.bv);
+  st.rewards=d.coin_rewards||[];st.coins=d.coins==null?st.coins:d.coins;
   if(d.guide){st.gd.km=!!d.guide.km;st.gd.en=!!d.guide.en}
   else["km","en"].forEach(function(l){fetch("/guide/"+l,{method:"HEAD",cache:"no-store"}).then(function(r){if(r.ok&&!st.gd[l]){st.gd[l]=true;if(st.tab==="store")draw()}}).catch(function(){})});
   st.ready=true;draw();if(st.signed&&!st.acct)account()})
