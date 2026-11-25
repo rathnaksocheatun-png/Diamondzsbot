@@ -304,6 +304,11 @@ html.spin .btn,html.spin .btn:before,html.spin .tile,html.spin .gs,html.spin #gl
  background:linear-gradient(180deg,#fff1c2,#ffc857 55%,#f3a81d);box-shadow:0 3px 0 #a8730a,inset 0 1px 0 rgba(255,255,255,.85)}
 .coinchip:active{transform:translateY(2px) scale(.96)!important}
 
+/* ---- coins on the right of the customer-name card ---- */
+.rcol{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.coinchip{margin-top:0;padding:4px 12px 4px 8px;font-size:15px}
+.cn{display:inline-block;width:20px;height:20px;border-radius:50%;border:2px solid #b36b00;
+ background:radial-gradient(circle at 35% 30%,#fffbe0,#ffd34d 45%,#d98f00);box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
 </style></head><body><div id="bgart"></div><div id="shade"></div><div id="glint"></div>
 <div id="gembig"><svg viewBox="0 0 300 260" aria-hidden="true"><g transform="translate(0 12) rotate(-14 150 130)" stroke="#fff" stroke-opacity="1" stroke-width="2" stroke-linejoin="round" fill-opacity=".48"><polygon points="35,90 85,28 110,60" fill="#cfeeff"/><polygon points="85,28 150,28 110,60" fill="#7fd0ff"/><polygon points="150,28 190,60 110,60" fill="#f0fbff"/><polygon points="215,28 150,28 190,60" fill="#4aa8ff"/><polygon points="215,28 265,90 190,60" fill="#b4c8ff"/><polygon points="35,90 110,60 95,90" fill="#7f8cff"/><polygon points="110,60 95,90 150,90" fill="#a6e4ff"/><polygon points="110,60 190,60 150,90" fill="#5f9bff"/><polygon points="190,60 150,90 205,90" fill="#cfeeff"/><polygon points="190,60 265,90 205,90" fill="#7fd0ff"/><polygon points="35,90 95,90 150,235" fill="#f0fbff"/><polygon points="95,90 150,90 150,235" fill="#4aa8ff"/><polygon points="150,90 205,90 150,235" fill="#b4c8ff"/><polygon points="205,90 265,90 150,235" fill="#7f8cff"/></g>
 <g fill="#fff"><path class="st" d="M250 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path class="st" style="animation-delay:-1s" d="M40 60l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-1.7s" d="M268 130l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path class="st" style="animation-delay:-.5s" d="M120 12l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></svg></div>
@@ -463,17 +468,18 @@ function head(){var w=el("div");
  var g=el("div","grow");g.appendChild(el("div","sub",T("tag")));c.appendChild(g);
  var gem=el("div","gem");gem.innerHTML='<svg viewBox="0 0 64 64" width="66" height="66"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20D9FF"/><stop offset="1" stop-color="#A855F7"/></linearGradient></defs><path d="M12 24 24 10h16l12 14-20 30z" fill="url(#gg)"/><path d="M12 24h40M24 10l8 14 8-14M32 54 24 24M32 54l8-30" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="1.5"/></svg>';c.appendChild(gem);
  var l=el("button","btn s alt",T("lg"));l.onclick=function(){st.lang=1-st.lang;draw()};c.appendChild(l);w.appendChild(c);return w}
+function coinChip(){var ch=el("button","coinchip");ch.appendChild(el("span","cn"));ch.appendChild(document.createTextNode(String(coinsNow())));
+ ch.onclick=function(){if(st.tab!=="profile"){st.tab="profile";st.game=null;draw();window.scrollTo(0,0);if(st.signed&&!st.acct)account()}else window.scrollTo(0,0)};return ch}
+function rightCol(lv){var r=el("div","rcol");if(lv)r.appendChild(lv);if(st.signed)r.appendChild(coinChip());return r}
 function coinsNow(){return(st.acct&&st.acct.coins!=null)?st.acct.coins:(st.coins||0)}
 function balCard(){var c=el("div","card row wallet");var g=el("div","grow");g.appendChild(el("div","big",st.bal===null?"—":money(st.bal)));
- if(st.signed){var ch=el("button","coinchip","🪙 "+coinsNow());
-  ch.onclick=function(){st.tab="profile";st.game=null;draw();window.scrollTo(0,0);if(st.signed&&!st.acct)account()};g.appendChild(ch)}
  c.appendChild(g);
  if(st.signed){var b=el("button","btn gold",T("deposit"));b.onclick=function(){if(st.pay)depositSheet();else notice(T("dep"))};c.appendChild(b)}return c}
 function gate(box){if(st.signed)return false;box.appendChild(el("div","note",T("bn")));
  if(st.bot){var a=el("a","btn w",T("ob"));a.href="https://t.me/"+encodeURIComponent(st.bot);a.target="_blank";a.rel="noopener";a.style.cssText="display:block;text-align:center;text-decoration:none";box.appendChild(a)}return true}
 function home(box){var u=el("div","card top");var a=el("div","av",((st.acct&&st.acct.name)||"D").charAt(0).toUpperCase());u.appendChild(a);
  var g=el("div","grow");g.appendChild(el("div","nm",(st.acct&&st.acct.name)||"Diamond ZS"));if(st.acct&&st.acct.tg_id)g.appendChild(el("div","sub","ID: "+st.acct.tg_id));u.appendChild(g);
- if(st.acct&&st.acct.level)u.appendChild(el("div","lvp",st.acct.level.icon+" "+st.acct.level.name));
+ u.appendChild(rightCol((st.acct&&st.acct.level)?el("div","lvp",st.acct.level.icon+" "+st.acct.level.name):null));
  if(st.signed)box.appendChild(u);box.appendChild(balCard());
  if(st.banner){var bn=el("div","card banner",st.banner);box.appendChild(bn)}
  var rb=rewardBanner();if(rb)box.appendChild(rb);
@@ -575,7 +581,7 @@ function rewardBanner(){var r=(st.rewards||[]).slice().sort(function(a,b){return
  var s=el("div","sub",r.map(function(x){return"≥ "+money(x[0])+" → 🪙 "+x[1]}).join("  •  "));
  s.style.cssText="margin-top:4px;text-align:center";c.appendChild(s);return c}
 function profile(box){if(gate(box))return;if(waitAcct(box))return;var a=st.acct||{};var c=el("div","card top");c.appendChild(el("div","av",(a.name||"?").charAt(0).toUpperCase()));
- var g=el("div","grow");g.appendChild(el("div","nm",a.name||""));if(a.username)g.appendChild(el("div","sub","@"+a.username));c.appendChild(g);box.appendChild(c);box.appendChild(balCard());
+ var g=el("div","grow");g.appendChild(el("div","nm",a.name||""));if(a.username)g.appendChild(el("div","sub","@"+a.username));c.appendChild(g);c.appendChild(rightCol(null));box.appendChild(c);box.appendChild(balCard());
  var wc=wheelCard();if(wc)box.appendChild(wc);
  var s=el("div","card row stats");[[T("tord"),a.total_orders||0],[T("tsp"),money(a.total_spent_cents||0)]].forEach(function(p,i){var d=el("div","grow stc"+(i+1));d.appendChild(el("div","sub",p[0]));d.appendChild(el("div","nm",String(p[1])));s.appendChild(d)});box.appendChild(s);
  var l=el("div","card row");l.appendChild(el("div","grow",T("lang")));var b=el("button","btn s alt",T("lg"));b.onclick=function(){st.lang=1-st.lang;draw()};l.appendChild(b);box.appendChild(l);
