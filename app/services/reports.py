@@ -58,3 +58,25 @@ async def sales_report(db: Database) -> dict:
         "level_bonus": level_bonus,
         "per_game": per_game,
     }
+
+
+async def spin_report(db: Database) -> dict:
+    """Numbers for the lucky wheel (admin panel)."""
+    total = await db.fetchone(
+        "SELECT COUNT(*) AS n, COALESCE(SUM(prize_cents), 0) AS paid, "
+        "COUNT(DISTINCT user_id) AS players FROM spins")
+    today = await db.fetchone(
+        "SELECT COUNT(*) AS n, COALESCE(SUM(prize_cents), 0) AS paid FROM spins "
+        "WHERE day = date('now','+7 hours')")
+    by_source = await db.fetchall("SELECT source, COUNT(*) AS n FROM spins GROUP BY source")
+    by_prize = await db.fetchall(
+        "SELECT prize_cents, COUNT(*) AS n FROM spins GROUP BY prize_cents ORDER BY prize_cents")
+    sold = await db.fetchone(
+        "SELECT COUNT(*) AS buys, COALESCE(-SUM(amount_cents), 0) AS revenue, "
+        "COALESCE(SUM(CAST(substr(note, 12) AS INTEGER)), 0) AS coins "
+        "FROM transactions WHERE note LIKE '[coin]%'")
+    held = await db.fetchone("SELECT COALESCE(SUM(coins), 0) AS coins FROM users")
+    return {"total": total, "today": today,
+            "by_source": {r["source"]: r["n"] for r in by_source},
+            "by_prize": {r["prize_cents"]: r["n"] for r in by_prize},
+            "sold": sold, "held": held["coins"]}
