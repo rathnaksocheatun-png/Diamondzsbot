@@ -3,6 +3,7 @@ import logging
 import sqlite3
 
 from app.database.db import Database
+from app.services import coins as coin_service
 from app.services.errors import (
     DuplicateOrder,
     InsufficientBalance,
@@ -78,20 +79,30 @@ async def create_order(
         raise DuplicateOrder()
 
 
-async def complete_order(db: Database, order_id: int) -> None:
-    changed = await db.execute(
-        "UPDATE orders SET status = 'completed', updated_at = datetime('now') "
-        "WHERE id = ? AND status = 'pending'",
-        (order_id,),
-    )
-    if changed != 1:
-        raise NotFoundOrAlreadyHandled()
+async def complete_order(db: Database, order_id: int) -> int:
+    """Mark an order completed. Returns the free coins the customer earned (0 = none)."""
+    tiers = await coin_service.get_rewards(db)        # read BEFORE the transaction
+    async with db.transaction() as conn:
+        cur = await conn.execute(
+            "UPDATE orders SET status = 'completed', updated_at = datetime('now') "
+            "WHERE id = ? AND status = 'pending'", (order_id,))
+        if cur.rowcount != 1:
+            raise NotFoundOrAlreadyHandled()
+        cur = await conn.execute(
+            "SELECT user_id, price_cents FROM orders WHERE id = ?", (order_id,))
+        order = await cur.fetchone()
+        coins = coin_service.reward_for(order["price_cents"], tiers)
+        if coins:
+            await conn.execute("UPDATE users SET coins = coins + ? WHERE id = ?",
+                               (coins, order["user_id"]))
+    coin_service.notify_reward(db, order_id, coins)    # after the commit
     # Friend referral bonus. It must NEVER stop an order from being completed.
     try:
         from app.services import loyalty
         await loyalty.reward_for_order(db, order_id)
     except Exception:
         log.exception("Referral reward failed for order %s (the order itself is completed)", order_id)
+    return coins
 
 
 async def cancel_order(db: Database, order_id: int) -> None:
