@@ -252,9 +252,14 @@ async def cmd_margin(message: Message, command: CommandObject, db: Database,
 async def cmd_sync(message: Message, db: Database, b2g: Optional[Bay2GameClient] = None):
     if not await _client_or_explain(message, b2g):
         return
-    changes, problems = await pricing.sync_prices(db, b2g)
-    text = ("💲 <b>Prices updated</b>\n" + pricing.describe(changes)) if changes \
+    report: dict = {}
+    changes, problems = await pricing.sync_prices(db, b2g, report=report)
+    text = ("💲 <b>Prices updated</b>\n" + pricing.describe(changes, limit=1800)) if changes \
         else "✅ All prices are already correct."
+    vis = pricing.describe_visibility(report.get("hidden", []), report.get("restored", []),
+                                      limit=900)
+    if vis:
+        text += "\n\n" + vis
     if problems:
         text += "\n\n⚠️ " + "\n⚠️ ".join(esc(x) for x in problems[:5])
         if len(problems) > 5:
