@@ -23,13 +23,14 @@ _MENU_ROWS = [
 
 
 # Button colours (Telegram: "primary" = blue, "success" = green, "danger" = red).
-# Telegram only allows these colours (plus plain grey when no style is given), so they are
-# alternated like a checkerboard: neighbouring buttons never share a colour.
+# Telegram only allows these 3 colours. A button that is NOT listed here (e.g. "language")
+# is plain grey. To change a colour, edit the word after the button name.
 _MENU_STYLE = {
-    "buy": "danger",     "orders": "primary",     # red    | purple
-    "wallet": "success", "deposit": "danger",     # green  | red
-    "promos": "primary", "support": "success",    # purple | green
-    "history": "danger", "howto": "primary",      # red    | purple
+    "buy": "success",     "orders": "primary",    # 💎 green | 📦 blue
+    "wallet": "success",  "deposit": "danger",    # 👛 green | ➕ red
+    "promos": "primary",  "support": "primary",   # 🎁 blue  | 💬 blue
+    "history": "danger",  "howto": "danger",      # 🧾 red   | ℹ️ red
+    # "language": not listed on purpose -> grey
 }
 
 
